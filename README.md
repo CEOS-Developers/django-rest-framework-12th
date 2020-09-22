@@ -9,13 +9,41 @@ PR 보낼 때도 `본인의 브랜치-> 본인의 브랜치`로 해야 합니다
 노션 링크 (https://www.notion.so/2-Django-ORM-c46e2d2f88ac4d948d012c07605d8e03)
 
 ### 서비스 설명
-본인이 선택한 서비스에 대한 설명을 적어주세요!
+- 수강신청 서비스
+- 학생의 수강신청 현황을 확싱할 수 있다
+- 강좌에 대한 교수의 정보를 확인할 수 있다.
+- 학생과 교수의 연락처를 독자적인 테이블을 통해 확인할 수 있다.
 
 ### 모델 설명
-서비스에 대해 본인이 작성한 모델들에 대한 설명과 모델 간의 관계 등을 적어주세요!
+![]("./imgs/diagram.png")
 
 ### ORM 적용해보기
-shell에서 작성한 코드와 그 결과를 보여주세요! 
+![](".imgs/contact_table.png")
+![](".imgs/student_table.png")
+![](".imgs/professor_table.png")
+![](".imgs/course_table.png")
+![](".imgs/enrollment_table.png")
+```
+>>>Course.objects.all()
+```
+```
+<QuerySet [<Course: Course object (1)>, <Course: Course object (2)>, <Course: Course objec
+t (3)>]>
+```
+```p
+>>>Professor.objects.filter(professor_department='CSE')
+```
+```
+<QuerySet [<Professor: Professor object (1)>, <Professor: Professor object (2)>, <Professo
+r: Professor object (3)>]>
+
+```
+```
+>>> Student.objects.get(contact_id=2)
+```
+```
+<Student: Student object (2)>
+```
 
 ### 간단한 회고 
-과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
+- 처음에는 데이터를 shell에서 만들어서 좀 귀찮았지만 admin 페이지가 있다는 것을 안 후에는 그것을 사용했다. admin 페이지는 짱이다...! 오랜만의 개발이라 너무 재미있었고 앞으로의 과제들이 기대가 된다.
