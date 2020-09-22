@@ -8,23 +8,24 @@ from django.db import models
 # 2. 각 모델에 필드 최소 3개 이상 포함
 # 3. 서비스 관련 모델 3개 이상 + 유저 모델 1개 구현 (단, 유저는 필수 아님) # 서비스모델?? 유저모델???
 
-class Department(models.Model):  # 소속
-    division = models.CharField(max_length=20)  # 단대
-    major = models.CharField(max_length=40)  # 학과
-    contact=models.CharField(max_length=15) # 학과 전화번호
+class Contact(models.Model):  # 소속
+    email=models.CharField(max_length=40,null=True)
+    phone_number=models.CharField(max_length=20,null=True)
+    office_number=models.CharField(max_length=20,null=True)
 
 
 class Student(models.Model):  # 학생
-    student_name = models.CharField(max_length=20)  # 학생이름
-    student_department = models.ForeignKey(Department, on_delete=models.SET_NULL,
-                                           null=True)  # 소속(전공), 모든 학생 전공이 1개임을 가정
+    student_name = models.CharField(max_length=20,blank=True)  # 학생이름
+    student_department = models.CharField(max_length=20,null=True,blank=True)  # 소속(전공), 모든 학생 전공이 1개임을 가정
     student_id = models.CharField(max_length=20)  # 학번 != Pk
+    contact=models.ForeignKey(Contact,on_delete=models.CASCADE,null=True)
 
 
 class Professor(models.Model):  # 교수
-    professor_name = models.CharField(max_length=20)  # 교수 이름
-    professor_department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # 교수 소속
-    professor_major = models.CharField(max_length=40)  # 교수 세부전공
+    professor_name = models.CharField(max_length=20,blank=True)  # 교수 이름
+    professor_department = models.CharField(max_length=20,null=True,blank=True)  # 교수 소속
+    professor_major = models.CharField(max_length=40)  # 교수 세부 전공
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE,null=True)
 
 
 class Course(models.Model):  # 강좌
