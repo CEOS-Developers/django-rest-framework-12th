@@ -15,14 +15,14 @@ PR 보낼 때도 `본인의 브랜치-> 본인의 브랜치`로 해야 합니다
 - 학생과 교수의 연락처를 독자적인 테이블을 통해 확인할 수 있다.
 
 ### 모델 설명
-![]("./imgs/diagram.png")
+![](./imgs/diagram.png)
 
 ### ORM 적용해보기
-![](".imgs/contact_table.png")
-![](".imgs/student_table.png")
-![](".imgs/professor_table.png")
-![](".imgs/course_table.png")
-![](".imgs/enrollment_table.png")
+![](./imgs/contact_table.png)
+![](./imgs/student_table.png)
+![](./imgs/professor_table.png)
+![](./imgs/course_table.png)
+![](./imgs/enrollment_table.png)
 ```
 >>>Course.objects.all()
 ```

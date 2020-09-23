@@ -15,21 +15,21 @@ class Contact(models.Model):  # 소속
 
 
 class Student(models.Model):  # 학생
-    student_name = models.CharField(max_length=20,blank=True)  # 학생이름
-    student_department = models.CharField(max_length=20,null=True,blank=True)  # 소속(전공), 모든 학생 전공이 1개임을 가정
+    student_name = models.CharField(max_length=20)  # 학생이름
+    student_department = models.CharField(max_length=20,null=True)  # 소속(전공), 모든 학생 전공이 1개임을 가정
     student_id = models.CharField(max_length=20)  # 학번 != Pk
-    contact=models.ForeignKey(Contact,on_delete=models.CASCADE,null=True)
+    contact=models.ForeignKey(Contact,on_delete=models.SET_NULL,null=True)
 
 
 class Professor(models.Model):  # 교수
-    professor_name = models.CharField(max_length=20,blank=True)  # 교수 이름
-    professor_department = models.CharField(max_length=20,null=True,blank=True)  # 교수 소속
+    professor_name = models.CharField(max_length=20)  # 교수 이름
+    professor_department = models.CharField(max_length=20,null=True)  # 교수 소속
     professor_major = models.CharField(max_length=40)  # 교수 세부 전공
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE,null=True)
+    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL,null=True)
 
 
 class Course(models.Model):  # 강좌
-    professor = models.ForeignKey(Professor, on_delete=models.CASCADE)  # 교수
+    professor = models.ForeignKey(Professor, on_delete=models.SET_NULL,null=True)  # 교수
     course_name = models.CharField(max_length=40)  # 강좌명
     course_id = models.CharField(max_length=20)  # 학수번호!=PK
     classroom = models.CharField(max_length=20)  # 강의실
