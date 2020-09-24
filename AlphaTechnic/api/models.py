@@ -1,8 +1,37 @@
 from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
 
-# 모델링 과제를 이곳에서 해주시면 됩니다! (주석은 나중에 지우셔도 돼요!)
 
-# [제약조건]
-# 1. 1:1과 1:n의 관계 포함
-# 2. 각 모델에 필드 최소 3개 이상 포함
-# 3. 서비스 관련 모델 3개 이상 + 유저 모델 1개 구현 (단, 유저는 필수 아님)
+class Post(models.Model):
+    content = models.TextField(max_length=1000)
+    posted_date = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes = models.IntegerField(default=0)
+    dislikes = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.content[:15] + '...'
+
+    def num_of_comments(self):
+        return Comment.objects.filter(connected_post=self).count()
+
+
+class Comment(models.Model):
+    content = models.TextField(max_length=150)
+    posted_date = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    connected_post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.content[:15] + '.. -> ' + str(self.connected_post)[:8] + '..'
+
+
+class Preference(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    likes = models.IntegerField(default=0)
+    date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.user) + '.. : ' + str(self.post) + ' : \"' + str(self.likes) + '\" likes'
