@@ -11,7 +11,7 @@ class Profile(models.Model):
     age = models.IntegerField()
     gender = models.BooleanField()
     address = models.CharField(max_length=100)
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
 
 class Movie(models.Model):
     title = models.CharField(max_length=100)
