@@ -22,7 +22,7 @@ class PlayInfo(models.Model):
     time = models.DateTimeField()
     seat_left = models.IntegerField(default=200)
     movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="movie_play_info")
-    profile = models.ManyToManyField(Profile)
+    profile = models.ManyToManyField(Profile, null=True)
 
 
 class Comment(models.Model):
