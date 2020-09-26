@@ -1,11 +1,12 @@
 from django.db import models
 from posts.models import Product
+from api import models as user_model
 
 
 # Create your models here.
 class Cart(models.Model):
     cart_id = models.CharField(max_length=255,blank=True)
-    data_added=models.DateField(auto_now_add=True) # 구입 상품 별 날짜
+    data_added = models.DateField(auto_now_add=True)  # 구입 상품 별 날짜
 
     def __str__(self):
         return self.cart_id
