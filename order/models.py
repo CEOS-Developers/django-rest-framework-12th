@@ -14,6 +14,6 @@ class Order(models.Model):
         null=True,
         on_delete=models.CASCADE
     )
-    quantity = models.IntgerField(default=1)
+    quantity = models.PositiveIntegerField()
     amount = models.PositiveIntegerField(verbose_name='결제금액')
     order_date = models.DateTimeField(auto_now_add=True)

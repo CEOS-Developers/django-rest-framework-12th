@@ -25,7 +25,10 @@ DATABASES = secrets['DB_SETTINGS']
 # Application definition
 
 INSTALLED_APPS = [
-    ' api.apps.ApiConfig',
+    'api.apps.ApiConfig',
+    'cart.apps.CartConfig',
+    'order.apps.OrderConfig',
+    'posts.apps.PostsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -83,7 +86,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+AUTH_USER_MODEL = 'api.User'
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 

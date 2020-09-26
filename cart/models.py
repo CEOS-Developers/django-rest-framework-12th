@@ -1,6 +1,5 @@
 from django.db import models
 from posts.models import Product
-from api import models as user_model
 
 
 # Create your models here.
