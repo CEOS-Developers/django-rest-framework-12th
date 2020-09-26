@@ -9,27 +9,32 @@ from django.contrib.auth.models import User
 
 class Profile(models.Model):
     age = models.IntegerField()
-    gender = models.BooleanField()
+    GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'))
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES)
     address = models.CharField(max_length=100)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
 
 class Movie(models.Model):
     title = models.CharField(max_length=100)
-    genre = models.CharField(max_length=100)
+    GENRE_CHOICES = (('Thriller', 'Thriller'), ('SF', 'SF'), ('Horror', 'Horror'),
+                     ('Drama', 'Drama'), ('Romance', 'Romance'), ('Action', 'Action'),
+                     ('Fantasy', 'Fantasy'), ('Mystery', 'Mystery'), ('Animation', 'Animation'))
+    genre = models.CharField(max_length=100, choices=GENRE_CHOICES)
     running_time = models.IntegerField()
 
-class PlayInfo(models.Model):
-    time = models.DateTimeField()
+class Timetable(models.Model):
+    start_time = models.DateTimeField()
     seat_left = models.IntegerField(default=200)
     movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="movie_play_info")
+    #일단 둘 다 놔두었습니다-관련 질문이 있어서요!
     profile = models.ManyToManyField(Profile, blank=True)
-
+    user = models.ManyToManyField(User, blank=True)
 
 class Comment(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
-    on_create = models.DateTimeField(auto_now_add=True)
-    movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="movie_comment")
+    create_time = models.DateTimeField(auto_now_add=True)
+    movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="comments")
 
 
 

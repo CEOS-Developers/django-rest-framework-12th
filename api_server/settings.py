@@ -23,7 +23,7 @@ with open(os.path.join(BASE_DIR, 'secrets.json'), 'rb') as secret_file:
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '@n(vxl4)6dk#0ur98z7a=6-l@w4j&tg*w22x^8$qkskf1oqo-w'
+SECRET_KEY = secrets['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
