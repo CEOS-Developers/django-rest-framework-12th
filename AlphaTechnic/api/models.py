@@ -16,6 +16,10 @@ class Post(models.Model):
     def num_of_comments(self):
         return Comment.objects.filter(connected_post=self).count()
 
+    @property
+    def comments(self):
+        return Comment.objects.filter(connected_post=self)
+
 
 class Comment(models.Model):
     connected_post = models.ForeignKey(Post, on_delete=models.CASCADE)
