@@ -43,6 +43,7 @@ class Actor(models.Model):
 
 
 class Movie(models.Model):
+    # Actor와 Movie를 M:N으로 연결
     actor = models.ManyToManyField(Actor)
     title = models.CharField(max_length=30)
     house = models.PositiveIntegerField(unique='TRUE', default=0)
@@ -73,3 +74,6 @@ class Description(models.Model):
     director = models.TextField(max_length=20)
     des = models.TextField(max_length=1000)
     published_date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return '<desc of %s: %s>' % (self.movie.title, self.des)
