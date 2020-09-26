@@ -18,10 +18,10 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    connected_post = models.ForeignKey(Post, on_delete=models.CASCADE)
     content = models.TextField(max_length=150)
     posted_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    connected_post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.content[:15] + '.. -> ' + str(self.connected_post)[:8] + '..'
