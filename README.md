@@ -38,7 +38,21 @@ PR 보낼 때도 `본인의 브랜치-> 본인의 브랜치`로 해야 합니다
     amount부분을 어떻게 구현해야할지 등의 어려움이 있었습니다.
     
 ### ORM 적용해보기
-shell에서 작성한 코드와 그 결과를 보여주세요! 
+>>> Product.objects.create(name="apple",price=1200)
+<Product: Product object (1)>
+>>> Product.objects.create(name="pear",price=2500)
+<Product: Product object (2)>
+>>> Product.objects.create(name="watermelon",price=13200)
+<Product: Product object (3)>
+>>> Product.objects.all()
+<QuerySet [<Product: Product object (1)>, <Product: Product object (2)>, <Product: Product object (3)>]>
+>>> Product.object.filter(name="pear")
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+AttributeError: type object 'Product' has no attribute 'object'
+>>> Product.objects.filter(name="pear")
+<QuerySet [<Product: Product object (2)>]>
+>>>
 
 ### 간단한 회고 
     앞서 언급한 order 기능을 구현하며 여러 의문점이 있었지만..추후에 알게 되리라 믿습니다
