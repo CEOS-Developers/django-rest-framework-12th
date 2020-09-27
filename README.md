@@ -14,6 +14,39 @@
 다음 play_info에는 상영 시간 (예를 들어, 1시 영화, 3시 영화)와 남은 자리수를 넣어 설정하였습니다. 자리수는 임의로 총 200자리로 설정하였습니다.
 comment 에는 영화 코멘트 게시글에 대한 제목, 내용과 작성 날짜를 포함했습니다. 작성 날짜는 auto_now_add를 사용해서 자동으로 입력이 될 수 있도록
 설정하였습니다. 
+```python
+from django.db import models
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    age = models.IntegerField()
+    GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'))
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES)
+    address = models.CharField(max_length=100)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+
+class Movie(models.Model):
+    title = models.CharField(max_length=100)
+    GENRE_CHOICES = (('Thriller', 'Thriller'), ('SF', 'SF'), ('Horror', 'Horror'),
+                     ('Drama', 'Drama'), ('Romance', 'Romance'), ('Action', 'Action'),
+                     ('Fantasy', 'Fantasy'), ('Mystery', 'Mystery'), ('Animation', 'Animation'))
+    genre = models.CharField(max_length=100, choices=GENRE_CHOICES)
+    running_time = models.IntegerField()
+
+class Timetable(models.Model):
+    start_time = models.DateTimeField()
+    seat_left = models.IntegerField(default=200)
+    movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="movie_play_info")
+    #일단 둘 다 놔두었습니다-관련 질문이 있어서요!
+    profile = models.ManyToManyField(Profile, blank=True)
+    user = models.ManyToManyField(User, blank=True)
+
+class Comment(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    create_time = models.DateTimeField(auto_now_add=True)
+    movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="comments")
+```
 
 ### ORM 적용해보기
 1. 데이터 베이스 해당 모델 객체 3개 넣기 
