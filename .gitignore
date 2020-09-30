@@ -1,6 +1,6 @@
 .idea/
-/venv/
-/api_server/secrets.json
+myvenv/
+api_server/secrets.json
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/django
