@@ -75,3 +75,44 @@ shell에서 작성한 코드와 그 결과를 보여주세요!
 models.py를 작성할 때 데이터 타입 같은 것들을 일일이 찾아보는 과정이 쉽지 않았습니다!  
 db 툴에서 드랍다운 등을 이용해서 테이블을 만드는 과정에 익숙해서 그런 것 같습니다.  
 익숙해진다면 이런 방식으로 모델을 생성하고 db에 적용하는 방식이 더 편하게 느껴질 수 있을 것 같습니다!
+
+
+## 3주차 과제 (기한: 10/3 토요일까지)
+[과제 안내 노션](https://www.notion.so/3-DRF1-API-View-6d49c6ad888d4f249ffb52f0885c66d7)
+
+### 모델 선택 및 데이터 삽입
+선택한 모델의 구조와 데이터 삽입 후의 결과화면을 보여주세요!
+
+선택한 모델 구조
+```python
+class Routine(models.Model):
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='routines')
+    uuid = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, null=True, blank=True)
+    bgImage = models.IntegerField(default=0)
+    doneAt = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+```
+
+3개의 데이터 삽입 
+![modeldata](./img/modeldata.png)
+
+### 모든 list를 가져오는 API
+API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+
+### 특정한 데이터를 가져오는 API
+API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+
+### 새로운 데이터를 create하도록 요청하는 API
+요청한 URL 및 Body 데이터의 내용과 create된 결과를 보여주세요!
+
+### (선택) 특정 데이터를 삭제 또는 업데이트하는 API
+위의 필수 과제와 마찬가지로 요청 URL 및 결과 데이터를 보여주세요!
+
+### 공부한 내용 정리
+새로 알게된 점, 정리 하고 싶은 개념, 궁금한점 등을 정리해 주세요
+
+### 간단한 회고 
+과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
