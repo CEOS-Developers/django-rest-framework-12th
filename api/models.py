@@ -34,7 +34,7 @@ class Product(models.Model) :
     price = models.IntegerField()
     color = models.CharField(max_length=10)
     size = models.CharField(max_length=3)
-    customer = models.ManyToManyField(Customer, through='Order')#through 옵션 사용
+    customer = models.ManyToManyField(Customer, through='Choice')#through 옵션 사용
     #+적립금..?
     class Meta:
         db_table = 'products'
@@ -45,15 +45,27 @@ class Product(models.Model) :
     def __str__(self):
         return str(self.id)
 
-#서비스 관련 모델2) 주문 (유저모델과 1을 연결할 mapping table), N:M 관계 아직 못함..
+#서비스 관련 모델 추가) 선택(유저모델과 product를 연결할 mapping table)
+class Choice(models.Model):
+    #FK
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='choices')
+    #FK
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='choices')
+    quantity = models.IntegerField()
+
+    class Meta:
+        db_table = 'choices'
+        verbose_name = 'Choice'
+        verbose_name_plural = 'Choices'
+        ordering = ['id']
+
+#서비스 관련 모델2) 주문
 class Order(models.Model) :
     order_quantity = models.IntegerField()
     order_addr = models.CharField(max_length=100)
     date_of_order = models.DateTimeField(auto_now=True)#저장될 때마다 자동으로 필드에 현재 시간 설정
     #+FK :고객ID
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
-    #+FK :상품ID
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='orders')
 
     class Meta:
         db_table = 'orders'
@@ -120,3 +132,5 @@ class Answer(models.Model) :
         db_table = 'answers'
         verbose_name = 'Answer'
         verbose_name_plural = 'Answers'
+
+
