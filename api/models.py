@@ -1,7 +1,6 @@
 from django.db import models
-from .validators import validate_score
-from django.utils import timezone
-
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 # 모델링 과제를 이곳에서 해주시면 됩니다! (주석은 나중에 지우셔도 돼요!)
 
@@ -20,60 +19,71 @@ from django.utils import timezone
 5. 이용자 모델도 구현하고 싶긴한데, 시간이 되련지 모르겠다... 하루는 왜 24시간일까? 좀 더 길었으면 좋겠다.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-html_text = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <title>Page Title</title>
-    </head>
-    <body>
-
-    <h1>This is a Heading</h1>
-    <p>This is a paragraph.</p>
-
-    </body>
-    </html>
-"""
-
 
 class Actor(models.Model):
-    name = models.CharField(primary_key='TRUE', max_length=20)
+    name = models.CharField(max_length=20)
     age = models.IntegerField()
-    height = models.FloatField()
+    height = models.IntegerField()
+
+    def __str__(self):
+        return '<%s: %d, %d>' % (self.name, self.age, self.height)
 
 
 class Movie(models.Model):
     # Actor와 Movie를 M:N으로 연결
-    actor = models.ManyToManyField(Actor)
+    actors = models.ManyToManyField(Actor)
+    director = models.CharField(max_length=20)
     title = models.CharField(max_length=30)
-    house = models.PositiveIntegerField(unique='TRUE', default=0)
-    price = models.IntegerField(default=10000)
-    seat = models.IntegerField(default=100, null='TRUE')
+    synopsis = models.TextField()
+    published_date = models.DateField(auto_now_add=True)
+    running_time = models.IntegerField()
 
     def __str__(self):
         return self.title
+
+    # 영화에 달린 comment 개수
+    def comment_count(self):
+        return self.comments.count()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User,
+                                on_delete=models.CASCADE)
+    nickname = models.CharField(max_length=15, verbose_name='user nickname')
+    movie = models.ManyToManyField(Movie,
+                                   related_name='movies',
+                                   blank=True
+                                   )
+
+    def __str__(self):
+        return f'{self.user.username} profile'
 
 
 class Comment(models.Model):
     movie = models.ForeignKey(Movie,
                               on_delete=models.CASCADE,
-                              related_name='comment')
-    review = models.TextField(max_length=1000)
-    written_date = models.DateField(default=timezone.now)
-    """ 평점에 대한 부분은 0~10으로 제한했고, validators.py를 통해 구현 """
-    grade = models.IntegerField(default=5, validators=[validate_score])
-    count = models.IntegerField(default=0)
+                              related_name='comments')
+    profile = models.ForeignKey(Profile,
+                                on_delete=models.CASCADE,
+                                related_name='profile')
+    # ForeignKey 설정할 때 받아오는 모델에 ''을 추가해주면 나중에 선언한 Model을 받아올 수 있음
+    review = models.TextField()
+    written_date = models.DateField(auto_now=True)  # comment를 가장 처음 작성한 시간
+    update_date = models.DateField(auto_now_add=True)  # comment를 수정한 경우 수정한 시간
+    rating = models.IntegerField(default=5,
+                                 validators=[MinValueValidator(0), MaxValueValidator(10)])
 
     def __str__(self):
         return '<%s, %s>' % (self.movie.title, self.review)
 
 
-class Description(models.Model):
-    movie = models.OneToOneField(Movie,
-                                 on_delete=models.CASCADE)
-    director = models.TextField(max_length=20)
-    des = models.TextField(max_length=1000)
-    published_date = models.DateField(default=timezone.now)
-
-    def __str__(self):
-        return '<desc of %s: %s>' % (self.movie.title, self.des)
+class Screen(models.Model):
+    movie = models.ForeignKey(Movie,
+                              on_delete=models.CASCADE,
+                              related_name='screens')
+    container = models.PositiveIntegerField(primary_key=True,
+                                            unique=True,
+                                            default=1)
+    startTime = models.DateField(auto_now=True)
+    price = models.IntegerField(blank=True, null=True)
+    seat = models.IntegerField(blank=True, null=True)
