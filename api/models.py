@@ -21,7 +21,7 @@ from django.contrib.auth.models import User
 
 
 class Actor(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, default='')
     age = models.IntegerField()
     height = models.IntegerField()
 
@@ -31,11 +31,13 @@ class Actor(models.Model):
 
 class Movie(models.Model):
     # Actor와 Movie를 M:N으로 연결
-    actors = models.ManyToManyField(Actor)
-    director = models.CharField(max_length=20)
+    actors = models.ManyToManyField(Actor,
+                                    related_name='movies'
+                                    )
     title = models.CharField(max_length=30)
+    director = models.CharField(max_length=20)
     synopsis = models.TextField()
-    published_date = models.DateField(auto_now_add=True)
+    published_date = models.DateField(auto_now=True)
     running_time = models.IntegerField()
 
     def __str__(self):
