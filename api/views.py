@@ -14,10 +14,11 @@ from .Serializers import RoutineSerializer
 class RoutineList(APIView):
     """
     게시물 생성
-    /post/
+    /routine/
     """
     def post(self, request, format=None):
         serializer = RoutineSerializer(data=request.data)
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -25,7 +26,7 @@ class RoutineList(APIView):
 
     """
     게시물 조회
-    /post/
+    /routine/
     """
     def get(self, request, format=None):
         queryset = Routine.objects.all()
@@ -33,7 +34,7 @@ class RoutineList(APIView):
         return Response(serializer.data)
 
 
-class PostDetail(APIView):
+class RoutineDetail(APIView):
     def get_object(self, pk):
         try:
             return Routine.objects.get(pk=pk)
@@ -42,7 +43,7 @@ class PostDetail(APIView):
 
     """
     특정 게시물 조회
-    /post/{pk}/
+    /routine/{pk}/
     """
     def get(self, request, pk):
         routine = self.get_object(pk)
@@ -51,7 +52,7 @@ class PostDetail(APIView):
 
     """
     특정 게시물 수정
-    /post/{pk}/
+    /routine/{pk}/
     """
     def put(self, request, pk, format=None):
         routine = self.get_object(pk)
@@ -63,7 +64,7 @@ class PostDetail(APIView):
 
     """
     특정 게시물 삭제
-    /post/{pk}/
+    /routine/{pk}/
     """
     def delete(self, request, pk, format=None):
         routine = self.get_object(pk)

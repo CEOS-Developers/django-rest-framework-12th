@@ -83,7 +83,7 @@ db 툴에서 드랍다운 등을 이용해서 테이블을 만드는 과정에 �
 ### 모델 선택 및 데이터 삽입
 선택한 모델의 구조와 데이터 삽입 후의 결과화면을 보여주세요!
 
-선택한 모델 구조
+선택한 모델(Routine) 구조
 ```python
 class Routine(models.Model):
     profile = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='routines')
@@ -100,19 +100,116 @@ class Routine(models.Model):
 ![modeldata](./img/modeldata.png)
 
 ### 모든 list를 가져오는 API
-API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+- Request URL : http://127.0.0.1:8000/api/routine/  
+- METHOD : GET  
+- Result : 
+```json
+[
+    {
+        "id": 4,
+        "uuid": "asfdlkjasdflkj",
+        "name": "이분할 루틴",
+        "bgImage": 3,
+        "doneAt": null,
+        "profile": 3
+    },
+    {
+        "id": 5,
+        "uuid": "afljkfdsalkjfdsajlk",
+        "name": "Strong lift 5x5",
+        "bgImage": 5,
+        "doneAt": null,
+        "profile": 3
+    },
+    {
+        "id": 6,
+        "uuid": "dsajklt42u90",
+        "name": "Jim Wendler 531",
+        "bgImage": 8,
+        "doneAt": null,
+        "profile": 3
+    }
+]
+```
+  
+- 3개의 목록이 잘 가져와졌다. id가 4부터 시작하는 이유는 앞서 생성한 루틴이 삭제되었기 때문
+- admin에서 profile을 선택했기 때문에 profile : 3을 여기서 이해하지 못했다.
+    - 왜 객체가 아니라 3이 뜨지..?
+
 
 ### 특정한 데이터를 가져오는 API
-API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+- Request URL : http://127.0.0.1:8000/api/routine/5  
+- METHOD : GET  
+- Result : 
+
+```json
+{
+    "id": 5,
+    "uuid": "afljkfdsalkjfdsajlk",
+    "name": "Strong lift 5x5",
+    "bgImage": 5,
+    "doneAt": null,
+    "profile": 3
+}
+```
 
 ### 새로운 데이터를 create하도록 요청하는 API
-요청한 URL 및 Body 데이터의 내용과 create된 결과를 보여주세요!
+URL : http://127.0.0.1:8000/api/routine/  
+METHOD : POST  
+Body : 
+```
+uuid:adslfkjh4t0u89fadsjlk
+name:새로운 플랜
+bgImage:8
+doneAt:
+profile:3
+```
+Result : 
+```json
+{
+    "id": 7,
+    "uuid": "adslfkjh4t0u89fadsjlk",
+    "name": "새로운 플랜",
+    "bgImage": 8,
+    "doneAt": null,
+    "profile": 3
+}
+```
+
+- create을 해야 할때 4개의 필드는 단순한 데이터지만 profile은 객체이기에 어떻게 값을 전달해야할지 혼란이 왔다.
+    - 그냥 pk를 입력해주면 되는 것이었다
+    - 'profile : 3'의 3이 pk인 것을 여기서 알았다...
+    - 역시 모르겠으면 일단 넘어가고 해보기 ㅎ 
+
 
 ### (선택) 특정 데이터를 삭제 또는 업데이트하는 API
-위의 필수 과제와 마찬가지로 요청 URL 및 결과 데이터를 보여주세요!
+URL : http://127.0.0.1:8000/api/routine/7   
+METHOD : DELETE   
+RESULT : 
+```json
+{
+    "id": 7,
+    "uuid": "adslfkjh4t0u89fadsjlk",
+    "name": "새로운 플랜",
+    "bgImage": 8,
+    "doneAt": null,
+    "profile": 3
+}
+```
+
+- DELETE만 진행해보았다. CRUD가 정말 쉽다.
 
 ### 공부한 내용 정리
-새로 알게된 점, 정리 하고 싶은 개념, 궁금한점 등을 정리해 주세요
+1. 아주 어렴풋이 알고 있던 REST API의 개념을 조금 알게 되었습니다.
+- URI는 자원을 표시
+- HTTP Method(Post, Get, Put, Delete)로 자원에 대 행위(CRUD) 표현
 
-### 간단한 회고 
-과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
+2. pk를 명시하지 않은 모델의 경우 자동으로 생성된 id가 pk가 된다.
+
+3. Seralizer로 모델을 직렬화할 때, fk는 fk의 pk로 읽고 써진다.
+
+### 간단한 회고
+개인적으로 굉장히 재밌는 과제였습니다!  
+- Serializer와 View를 만들(복붙하)고 URL mapping만 했을 뿐인데 CRUD가 구현이 된다니 놀랐습니다.
+- 지금까지 URL에 routine/insert, routine/delete 등으로 행위를 담아 표현했었는데 HTTP METHOD로 깔끔하게 CRUD를 표현해보 REST API의 철학(?)을 조금은 이해한 기분이었습니다.  
+- CRUD가 아니라 로그인 등 로직이 들어간 요청은 어떻게 RESTful하게 처리하는지 조금 궁금해졌습니다.

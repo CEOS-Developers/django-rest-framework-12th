@@ -10,15 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    # user = UserSerializer()
 
     class Meta :
         model = Profile
-        fields = ['firebaseUid, deviceUid']
+        fields = '__all__'
 
 
 class RoutineSerializer(serializers.ModelSerializer):
-    Profile = ProfileSerializer()
+    # Profile = ProfileSerializer()
+
     class Meta:
         model = Routine
-        fields = ['uuid, name, bgImage, doneAt']
+        fields = '__all__'
