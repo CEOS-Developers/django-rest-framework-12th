@@ -13,11 +13,13 @@ class Customer(models.Model) :
         verbose_name = 'Customer'
         verbose_name_plural = 'Customers'
 
+    def __str__(self):
+        return self.user.username #관리자에서 객체 생성시 username으로 보임
+
 
 #서비스 관련 모델1) 상품
 #모든 항목 not NULL
 class Product(models.Model) :
-    #자동 증가하는 ID일 경우 별도 생성X
     #choices 생성 for type
     TYPE_CHOICES = [
         ('OUTERWEAR', 'OUTERWEAR'),
@@ -38,7 +40,10 @@ class Product(models.Model) :
         db_table = 'products'
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
+        ordering = ['id']
 
+    def __str__(self):
+        return str(self.id)
 
 #서비스 관련 모델2) 주문 (유저모델과 1을 연결할 mapping table), N:M 관계 아직 못함..
 class Order(models.Model) :
@@ -54,6 +59,10 @@ class Order(models.Model) :
         db_table = 'orders'
         verbose_name = 'Order'
         verbose_name_plural = 'Orders'
+        ordering = ['id']
+
+    def __str__(self):
+        return str(self.id)
 
 #서비스 관련 모델3) 장바구니 (유저 모델과 1:1 관계)
 class Cart(models.Model) :
