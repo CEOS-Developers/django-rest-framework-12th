@@ -55,6 +55,3 @@ AttributeError: type object 'Product' has no attribute 'object'
 >>>
 
 ### 간단한 회고 
-    앞서 언급한 order 기능을 구현하며 여러 의문점이 있었지만..추후에 알게 되리라 믿습니다
-    또 app별로 model을 나눴는데 models.py 한 파일에 넣어둬야하는건지 잘 모르겠습니다
-    여러가지로 다른분들이 짠 코드가 궁금하고 놓치고 있는 부분이 많은 것 같은 느낌입니다
