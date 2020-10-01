@@ -9,7 +9,7 @@ class Cart(models.Model):
 
 class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="date_added")
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_item_date")
     number = models.IntegerField()
 
     def total(self):
