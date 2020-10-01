@@ -1,3 +1,5 @@
 .idea/
 /venv/
-/api_server/secrets.json
+api_server/secrets.json
+secrets.json
+*/pyc

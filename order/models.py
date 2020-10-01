@@ -7,6 +7,7 @@ class Order(models.Model):
     user = models.ForeignKey(
         user_model.User,
         null=True,
+        blank=True,
         on_delete=models.CASCADE,
     )
     name = models.ForeignKey(
