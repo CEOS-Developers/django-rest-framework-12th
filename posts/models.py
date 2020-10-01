@@ -5,7 +5,7 @@ from api import models as user_model
 # data가 만들어진 time을 기록하기 위해 만듬
 class TimeStamp(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # 별도의 테이블을 생성하지 않게 함
     class Meta:
@@ -31,10 +31,10 @@ class Comment(TimeStamp):
         user_model.User,
         null=True,
         on_delete=models.CASCADE,
-        related_name='post_author'
+        related_name='comments'
     )
     # 댓글은 post를 fk로 갖는다
-    posts = models.ForeignKey(
+    post = models.ForeignKey(
         Post,
         null=True,
         on_delete=models.CASCADE,

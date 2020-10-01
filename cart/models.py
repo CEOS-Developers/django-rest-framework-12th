@@ -4,16 +4,12 @@ from posts.models import Product
 
 # Create your models here.
 class Cart(models.Model):
-    cart_id = models.CharField(max_length=255,blank=True)
-    data_added = models.DateField(auto_now_add=True)  # 구입 상품 별 날짜
-
-    def __str__(self):
-        return self.cart_id
+    data_added = models.DateField(auto_now_add=True, verbose_name="cart_date")
 
 
 class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="date_added")
     number = models.IntegerField()
 
     def total(self):
