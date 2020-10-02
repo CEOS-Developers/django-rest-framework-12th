@@ -14,7 +14,7 @@ class Customer(models.Model) :
         verbose_name_plural = 'Customers'
 
     def __str__(self):
-        return self.user.username #관리자에서 객체 생성시 username으로 보임
+        return 'id:{} name:{}'.format(str(self.user.id), self.user.username)
 
 
 #서비스 관련 모델1) 상품
@@ -43,7 +43,7 @@ class Product(models.Model) :
         ordering = ['id']
 
     def __str__(self):
-        return str(self.id)
+        return 'id:{} type:{}'.format(str(self.id), self.type)
 
 #서비스 관련 모델 추가) 선택(유저모델과 product를 연결할 mapping table)
 class Choice(models.Model):
@@ -58,6 +58,9 @@ class Choice(models.Model):
         verbose_name = 'Choice'
         verbose_name_plural = 'Choices'
         ordering = ['id']
+
+    def __str__(self):
+        return 'customer:{} product:{}'.format(self.customer_id, self.product_id)
 
 #서비스 관련 모델2) 주문
 class Order(models.Model) :
