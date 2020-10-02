@@ -40,6 +40,9 @@ class Movie(models.Model):
     published_date = models.DateField(auto_now=True)
     running_time = models.IntegerField()
 
+    class Meta:
+        managed = True
+
     def __str__(self):
         return self.title
 
