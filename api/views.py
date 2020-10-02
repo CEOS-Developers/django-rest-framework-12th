@@ -10,9 +10,12 @@ from .models import Customer, Product, Choice
 #ListAPIView:모델 객체 목록 및 새로운 객체 생성(get, post)
 #DetailAPIView:객체 내용, 수정, 삭제(get, put, delete)
 class UserListAPIView(APIView):
-    def get(self, request):
-        serializer = UserSerializer(User.objects.all(), many=True)#many=True왜쓰지?
-    def post(self, request):
+    def get(self, request, format=None):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
