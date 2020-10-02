@@ -3,22 +3,23 @@ from .models import Customer, Product, Choice
 from rest_framework import serializers
 
 class CustomerSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Customer
-        fields = ('id', 'addr', 'membership')
+        fields = ('addr', 'membership')
 
 class UserSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()#1대1관계인 customerserializer 추가
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'addr', 'membership')
+        fields = ('id', 'username', 'customer')
 
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = ('id', 'type', 'price', 'color', 'size')
 
 class ChoiceSerializer(serializers.ModelSerializer):
 
