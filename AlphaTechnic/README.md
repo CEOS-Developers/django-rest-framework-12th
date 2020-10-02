@@ -89,7 +89,7 @@ from django.contrib.auth.models import User
 from PIL import Image ## image를 재가공할 수 있는 패키지 설치
 
 
-class Profile(models.Model):
+class Profile(models.Model):  # profile
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='default.png', upload_to="users/profile_pic")
     ## 이미지 등록 안했을 경우의 default 이미지를 설정해줌.
@@ -118,8 +118,8 @@ class Profile(models.Model):
 
 class Follow(models.Model):
     ## User를 통해 user 혹은 follow_user를 역참조하기 위한 related_name 설정
-    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
-    follow_user = models.ForeignKey(User, related_name='follow_user', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE) # 이름을 좀더 명확히
+    follow_user = models.ForeignKey(User, related_name='follow_user', on_delete=models.CASCADE) 
     date = models.DateTimeField(auto_now_add=True)
 ```
 
@@ -221,3 +221,10 @@ Out[10]: 0
 2. mysql workbench가 내가 생성한 모델들을 table로 보여주어서, 해당 속성에 어떻게 접근해야하는지 쉽게 알 수 있었다.
 3. ForeignKey가 model을 어떻게 만들어 주는지 더 와닿게 느끼게 되었다.
 
+
+
+### 피드백
+
+이름을 좀 더 명확히 (related_time)
+
+follow, followee field를 묶을 수 있도록
