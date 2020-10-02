@@ -25,16 +25,12 @@ DATABASES = secrets['DB_SETTINGS']
 
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
-    'cart.apps.CartConfig',
-    'order.apps.OrderConfig',
-    'posts.apps.PostsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
 ]
 
 MIDDLEWARE = [
