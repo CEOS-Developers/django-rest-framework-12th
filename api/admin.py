@@ -8,7 +8,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Choice)
 class ChoiceAdmin(admin.ModelAdmin):
-    list_display = ['customer', 'product', 'quantity']
+    list_display = ['id', 'customer', 'product', 'quantity']
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
