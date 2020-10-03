@@ -1,20 +1,8 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 from django.db.models import CharField
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-
-
-class User(AbstractUser):
-    GENDER_CHOICES = [
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('C', 'Custom'),
-    ]
-    name = models.CharField(blank=True, max_length=255)
-    email = models.EmailField(max_length=254)
-    phone_number = models.CharField(blank=True, max_length=255)
-    gender = models.CharField(blank=True, choices=GENDER_CHOICES, max_length=2)
 
 
 # data가 만들어진 time을 기록하기 위해 만듬
@@ -27,16 +15,17 @@ class TimeStamp(models.Model):
         abstract = True
 
 
-# 제품 포스트란
-class Post(TimeStamp):
-    image = models.ImageField(blank=True)
-    caption = models.TextField(blank=True)
-
-
 # 제품란
 class Product(TimeStamp):
-    name = models.CharField(blank=True, max_length=255)
+    name = models.CharField(blank=True, max_length=255, null=True)
     price = models.IntegerField()
+
+
+# 제품 포스트란
+class Post(TimeStamp):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    image = models.ImageField(blank=True)
+    caption = models.TextField(blank=True)
 
 
 # 제품 포스트에 달리는 댓글란
