@@ -18,19 +18,25 @@ class Movie(models.Model):
 
 class Timetable(models.Model):
     start_time = models.DateTimeField()
-    movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="movie_play_info"),
+    movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="movie_play_info")
     user = models.ManyToManyField(User, blank=True)
 
     def count_spare_seat(self):
         MAX_SEATS = 200
         return MAX_SEATS - self.user.all().count()
 
+class Reservation(models.Model):
+    user = models.ManyToManyField(User, blank=True)
+    timetable = models.OneToOneField(Timetable, on_delete=models.CASCADE, related_name="timetable_reservation")
+    #어렵다.. user & reservation -> foreignkey?
+
 class Comment(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     create_time = models.DateTimeField(auto_now_add=True)
+    modify_time = models.DateTimeField(auto_now=True)
     movie = models.ForeignKey("Movie", on_delete=models.CASCADE, related_name="comments")
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="user_comment")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user_comment")
 
 
 
