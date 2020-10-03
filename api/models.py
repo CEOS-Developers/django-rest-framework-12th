@@ -42,6 +42,8 @@ class Movie(models.Model):
 
     class Meta:
         managed = True
+        verbose_name = 'movie'
+        verbose_name_plural = 'movies'
 
     def __str__(self):
         return self.title
@@ -60,6 +62,11 @@ class Profile(models.Model):
                                    blank=True
                                    )
 
+    class Meta:
+        managed = True
+        verbose_name = 'profile'
+        verbose_name_plural = 'profiles'
+
     def __str__(self):
         return f'{self.user.username} profile'
 
@@ -77,6 +84,11 @@ class Comment(models.Model):
     update_date = models.DateField(auto_now_add=True)  # comment를 수정한 경우 수정한 시간
     rating = models.IntegerField(default=5,
                                  validators=[MinValueValidator(0), MaxValueValidator(10)])
+
+    class Meta:
+        managed = True
+        verbose_name = 'comment'
+        verbose_name_plural = 'comments'
 
     def __str__(self):
         return '<%s, %s>' % (self.movie.title, self.review)
