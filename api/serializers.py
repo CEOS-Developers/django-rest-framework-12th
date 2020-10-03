@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Profile
+from .models import Movie
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -7,9 +7,3 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = '__all__'
         # exclude와 field는 동시에 사용 불가능
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = '__all__'

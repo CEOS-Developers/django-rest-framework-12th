@@ -400,29 +400,81 @@ class MovieDetailAPIView(APIView):
 
 ### 공부한 내용 정리
 
-- 보기 권한 설정
+- Serializer에서 표시할 내용
 
-```python
-from rest_framework import authentication, permissions
+  ```python
+  # fields = []
+  fields = ['field1', 'field2', 'field3', ... ] // 전체 field 중 표현하고 싶은 field만 출력한다.
+  
+  # exclude =[]
+  exclude = ['field4', 'filed5', ...] // 전체 field 중 exclude 선언한 field를 제외한 나머지 field를 출력한다.
+  
+  exclude 와 fields는 동시에 사용 불가능하다.
+  ```
 
-# 유저(Profile) 목록 및 새 유저 생성(admin만)
-class ProfileListAPIView(APIView):
-    """
-    View to list all users in the system.
+- Decorater
 
-    * Requires token authentication.
-    * Only admin users are able to access this view.
-    """
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAdminUser]
+  ```python
+  # 주석처리로 해둬 실제로 반영은 하지 않음
+  @api_view(['GET', 'PUT', 'DELETE'])
+  def movie_detail(request, pk):
+      movie = get_object_or_404(Movie, pk=pk)
+      if request.method == 'GET':
+          serializer = MovieSerializer(movie)
+          return Response(serializer.data)
+      elif request.method == 'PUT':
+          serializer = MovieSerializer(movie, data=request.data)
+          if serializer.is_valid():
+              serializer.save()
+              return Response(serializer.data)
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      else:
+          movie.delete()
+          return Response(status=status.HTTP_204_NO_CONTENT)
+  ```
 
-...
-```
+  - Decorator란?
+    함수를 받아 명령을 추가한 뒤 이를 다시 함수의 형태로 반환하는 함수로, 주로 기존 함수 내부를 바꾸고 싶지 않을 때 사용한다.
 
-​	위와 같이 선언한 경우, 권한이 주어져있는 사용자에게만 정보를 보여준다. 사용자의 정보를 입력받아야 하는데, 
+    - 구조
 
+      ```python
+      def origin_func(func): # parameter func는 기존에 존재하는 함수로, 기능이 더해질 함수이다.
+      	def editted_func():
+      		func()
+      	return editted_func
+      ```
 
+    - 예시
+
+      ```python
+      def decorator_function(original_function): #2
+          def wrapper_function():						#5
+              print '{} 함수가 호출되기전 입니다.'.format(original_function.__name__)
+              return original_function()    
+          return wrapper_function						#4
+      
+      
+      def display_1():												#3
+          print 'display_1 함수가 실행됐습니다.'
+      
+      
+      def display_2():
+          print 'display_2 함수가 실행됐습니다.'
+      
+      
+      display_1 = decorator_function(display_1)  #1
+      
+      display_1()
+      print
+      
+      >>>
+      display_1 함수가 호출되기전 입니다.
+      display_1 함수가 실행됐습니다.
+      ```
+
+      
 
 ### 간단한 회고
 
-과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
+admin을 이용해 CRUD하는 게 더 좋고 효과적인 것 같은데, admin과 비교했을 때 DRF의 상대적 장점이 있는지 궁금하다..
