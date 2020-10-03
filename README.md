@@ -237,3 +237,192 @@ B. filter 이용
 모델링을 하고 모델 간에 관계를 연결하다보니 계속해서 추가적으로 구현해야 하는 부분이 생겼고, 그러다보니 외래키를 사용하는 부분이 바뀌거나(ex. 영화->코멘트에서 코멘트->영화 등 순서 바꾸기) 필드를 없애고 다른 모델을 참조해 구현하게 되는 경우도 있었다. 그러다보니 전체 모델링이 바뀌고, makemigration, migrate를 하면 갑자기 오류가 나는 경우가 종종 있었다. 그럴 때마다 겁먹지 않고 migrate폴더 내용물을 삭제하는 대담함은 생겼지만 언제까지고 삭제만 하고 있으면 오류를 고치는 실력은 안 늘 것 같다.
 
 과제가 무엇인지 잘 읽어봐야겠다 라는 생각을 했다. 단순히 모델링만 하는 줄 모르고 view를 구현하려다 현타가 오고 멘탈이 터졌다(카톡에 질문 올린 시점). 그러다가 진호님과 줌도 하면서 멘탈 케어도 해주셨는데 그게 참 감사했다. 좋으신 분이다.
+
+
+
+## 3주차 과제 (기한: 10/3 토요일까지)
+
+[과제 안내 노션](https://www.notion.so/3-DRF1-API-View-6d49c6ad888d4f249ffb52f0885c66d7)
+
+### 모델 선택 및 데이터 삽입
+
+선택한 모델: Movie
+
+```python
+class Movie(models.Model):
+    # Actor와 Movie를 M:N으로 연결
+    actors = models.ManyToManyField(Actor,
+                                    related_name='movies'
+                                    )
+    title = models.CharField(max_length=30)
+    director = models.CharField(max_length=20)
+    synopsis = models.TextField()
+    published_date = models.DateField(auto_now=True)
+    running_time = models.IntegerField()
+
+    class Meta:
+        managed = True
+        verbose_name = 'movie'
+        verbose_name_plural = 'movies'
+
+    def __str__(self):
+        return self.title
+
+    # 영화에 달린 comment 개수
+    def comment_count(self):
+        return self.comments.count()
+```
+
+```mysql
+mysql> select * from api_movie;
++----+----------+-------+-------------+----------------+--------------+
+| id | director | title | synopsis    | published_date | running_time |
++----+----------+-------+-------------+----------------+--------------+
+|  1 | m1_dir   | m1    | m1_synopsis | 2020-10-01     |           70 |
+|  3 | m3_dir   | m3    | m3_synopsis | 2020-10-01     |          160 |
+|  7 | m2_dir   | m2    | m2_synopsis | 2020-10-03     |          100 |
++----+----------+-------+-------------+----------------+--------------+
+
+```
+
+
+
+### 모든 list를 가져오는 API
+
+url: api/movie
+
+method: GET
+
+![Screen Shot 2020-10-03 at 12.53.09 PM](/Users/seojoonhong/Desktop/Screen Shot 2020-10-03 at 12.53.09 PM.png)
+
+
+
+### 특정한 데이터를 가져오는 API
+
+url: api/movie/3
+
+method: GET
+
+![image-20201003125533053](/Users/seojoonhong/Library/Application Support/typora-user-images/image-20201003125533053.png)
+
+
+
+### 새로운 데이터를 create하도록 요청하는 API
+
+요청한 URL 및 Body 데이터의 내용과 create된 결과를 보여주세요!
+
+url: api/movie/
+
+method: POST
+
+```python
+{
+		# id, running_time 입력 생략
+    "title": "new movie by POST",
+    "director": "POST_dir",
+    "synopsis": "POST_synopsis",
+    "running_time": 10,
+    "actors": [
+        1,
+        3,
+        5
+    ]
+}
+```
+
+![image-20201003125953199](/Users/seojoonhong/Library/Application Support/typora-user-images/image-20201003125953199.png)
+
+![image-20201003130041621](/Users/seojoonhong/Library/Application Support/typora-user-images/image-20201003130041621.png)
+
+
+
+### (선택) 특정 데이터를 삭제 또는 업데이트하는 API
+
+위의 필수 과제와 마찬가지로 요청 URL 및 결과 데이터를 보여주세요!
+
+url: api/movie/1
+
+method: PUT
+
+id=1인 Movie 객체 내용을 바꾸는 과정
+
+~~~python
+class MovieDetailAPIView(APIView):
+		```
+		
+    def put(self, request, pk):
+        movie = self.get_object(pk)
+        serializer = MovieSerializer(movie, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+~~~
+
+![Screen Shot 2020-10-03 at 1.02.43 PM](/Users/seojoonhong/Desktop/Screen Shot 2020-10-03 at 1.02.43 PM.png)
+
+![Screen Shot 2020-10-03 at 1.02.54 PM](/Users/seojoonhong/Desktop/Screen Shot 2020-10-03 at 1.02.54 PM.png)
+
+
+
+개선해야할 점__
+
+현재 구현한 put에서는 모든 필드를 입력해야 바꿀 수 있다. running_time만 바꾸려고
+
+```python
+{
+"running_time": 100
+}
+```
+
+을 입력했는데 다음과 같은 오류가 났다.
+
+```python
+{
+    "title": [
+        "This field is required."
+    ],
+    "director": [
+        "This field is required."
+    ],
+    "synopsis": [
+        "This field is required."
+    ],
+    "actors": [
+        "This field is required."
+    ]
+}
+```
+
+조금 더 공부해서 한 필드만 update할 수 있게 인자를 설정하던가 해봐야한다.
+
+
+
+### 공부한 내용 정리
+
+- 보기 권한 설정
+
+```python
+from rest_framework import authentication, permissions
+
+# 유저(Profile) 목록 및 새 유저 생성(admin만)
+class ProfileListAPIView(APIView):
+    """
+    View to list all users in the system.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAdminUser]
+
+...
+```
+
+​	위와 같이 선언한 경우, 권한이 주어져있는 사용자에게만 정보를 보여준다. 사용자의 정보를 입력받아야 하는데, 
+
+
+
+### 간단한 회고
+
+과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
