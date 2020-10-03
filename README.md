@@ -106,3 +106,7 @@ t': datetime.datetime(2020, 10, 3, 21, 42, 32, 448990), 'product_id': None, 'ima
 ![api1](./image/api1.PNG)
 
 (2) 특정 데이터를 가져오는 API
+![api2](./image/api2.PNG)
+
+(3) 새로운 데이터를 create 하도록 요청하는 API
+![api3](./image/api3.PNG)
