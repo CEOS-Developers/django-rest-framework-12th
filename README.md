@@ -69,6 +69,7 @@ cgv 홈페이지에 한  들어가봤는데 정확하게 알지는 못하더라�
  
 
 ###모델 수정 10/03
+
 ```python
 class Timetable(models.Model):
     start_time = models.DateTimeField()
@@ -97,7 +98,7 @@ Reservation 모델을 추가해서 timetable 모델에서는 영화 시간만을
 Timetable 모델에서는 count_spare_seat 함수를 추가하여 최대 200자리로 설정 된 자리수에서 예약이 되면 자동으로 남은 자리수가 줄어들 수 있게 설정하였습니다.
 Comment 모델에 modify_time 을 추가하였는데 이는 이후 view 에서 comment 를 수정 한 뒤 수정한 시간까지 표현할 수 있게 추가하였습니다.  
 
-##urlpatterns 설정 
+###urlpatterns 설정 
 
 path를 두개로 나눠준 이유는 pk가 들어가느냐에 따라 달라진다. 
 
@@ -110,7 +111,7 @@ urlpatterns = [
 ]
 ```
 
-##모델 선택 및 데이터 삽입
+###모델 선택 및 데이터 삽입
 
 ```python
 from .models import *
@@ -129,9 +130,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
 ```
 
-##모든 list 를 가져오는 API
+###모든 list 를 가져오는 API
 
-모든 영화 리스트를 가져오는 API
+- 모든 영화 리스트를 가져오는 API
 ```python
 class MovieList(APIView):
     #영화 리스트 조회
@@ -145,7 +146,7 @@ class MovieList(APIView):
 ![get](./img/get.png "모든 영화 리스트 가져오기")
 
 
-모든 코멘트 리스트를 가져오는 API
+- 모든 코멘트 리스트를 가져오는 API
 ```python
 class CommentList(APIView):
     #comment 조회
@@ -155,9 +156,9 @@ class CommentList(APIView):
         json_data = serializer.data
         return Response(json_data)
 ```
-##특정한 데이터를 가져오는 API
+###특정한 데이터를 가져오는 API
 
-특정 영화를 가져오는 API
+- 특정 영화를 가져오는 API
 ```python
 class MovieDetail(APIView):
     def get_object(self, pk):
@@ -174,7 +175,7 @@ class MovieDetail(APIView):
 ```
 ![ddddd](./img/ddddd.png "특정 영화 가져오기")
 
-특정 코멘트를 가져오는 API 
+- 특정 코멘트를 가져오는 API 
 ```python
 class CommentDetail(APIView):
     def get_object(self, pk):
@@ -190,9 +191,9 @@ class CommentDetail(APIView):
         return Response(serializer.data)
 ```
 
-##새로운 데이터를 create 하도록 요청하는 API
+###새로운 데이터를 create 하도록 요청하는 API
 
-새로운 영화 생성 
+- 새로운 영화 생성 
 ```python 
 class MovieList(APIView):
     #영화 생성
@@ -204,7 +205,7 @@ class MovieList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 ```
 
-새로운 코멘트 생성 
+- 새로운 코멘트 생성 
 ```python
 class CommentList(APIView):
     #comment 생성
@@ -217,9 +218,9 @@ class CommentList(APIView):
 
 ```
 
-##특정 데이터를 삭제 또는 업데이트 하는 API
+###특정 데이터를 삭제 또는 업데이트 하는 API
 
-영화 정보 삭제 (상영 기간이 지났을 때)
+- 영화 정보 삭제 (상영 기간이 지났을 때)
 ```python
  #특정 영화 정보 삭제
     def delete(self, request, pk, format=None):
@@ -228,7 +229,7 @@ class CommentList(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 ```
 
-특정 코멘트 삭제 
+- 특정 코멘트 삭제 
 
 ```python
     #특정 코멘트 삭제
@@ -238,7 +239,7 @@ class CommentList(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 ```
 
-##공부한 내용 정리 
+###공부한 내용 정리 
 
 <Django View 란?>
  사용자가 요청 했을 때 응답을 해주는 코드를 작성하는 것 
@@ -277,7 +278,7 @@ Serializer은 왜 필요할까? 데이터 베이스에 django를 이용해 꺼�
   - 예전 쓰던 사용자가 수정 전 url을 넣어도 수정 된 url로 redirect 하는 것 
 4로 시작하면 유저 입력 잘못이라는 것 
 
-##질문 
+###질문 
 1. 
 ```python
 class Reservation(models.Model):
@@ -291,7 +292,7 @@ class Reservation(models.Model):
 
 3. 수정 혹은 추가 할 때 list 형태로 넘어오는 것도 할 수 있을것?....여러개의 데이터를 한번에 넣을 수 있는지...?
 
-##간단한 회고
+###간단한 회고
 
 중간에 view 를 추가하다가 모델을 수정하고 추가하는 과정을 거쳤는데 migration 에서 자꾸 에러가 떠서 db 를 모두 drop하고 다시 만드는
 고생을 했습니다. 여기서 알게 된 점은 모델링이 정말 중요하다는 것..모델링이 탄탄하지 않으면 view 단계에서 다시 수정해야하는 번거로움이
