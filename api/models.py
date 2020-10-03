@@ -12,13 +12,9 @@ class User(AbstractUser):
         ('C', 'Custom'),
     ]
     name = models.CharField(blank=True, max_length=255)
-    website = models.URLField(blank=True)
     email = models.EmailField(max_length=254)
     phone_number = models.CharField(blank=True, max_length=255)
     gender = models.CharField(blank=True, choices=GENDER_CHOICES, max_length=2)
-
-    def get_absolute_url(self):
-        return reverse("users:detail", kwargs={"username": self.username})
 
 
 # data가 만들어진 time을 기록하기 위해 만듬
@@ -40,7 +36,7 @@ class Post(TimeStamp):
 # 제품란
 class Product(TimeStamp):
     name = models.CharField(blank=True, max_length=255)
-    price = models.IntegerField(max_length=255)
+    price = models.IntegerField()
 
 
 # 제품 포스트에 달리는 댓글란
@@ -60,7 +56,6 @@ class Comment(TimeStamp):
         related_name='comment_post'
     )
     contents = models.TextField(blank=True)
-
 
 
 class Order(models.Model):
