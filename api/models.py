@@ -8,12 +8,18 @@ class Customer(models.Model) :
     addr = models.CharField(max_length=100)#추후에 확실히 찾아볼 것!
     membership = models.CharField(max_length=10)
     #적립금..?
+    class Meta:
+        db_table = 'customers'
+        verbose_name = 'Customer'
+        verbose_name_plural = 'Customers'
+
+    def __str__(self):
+        return 'id:{} name:{}'.format(str(self.user.id), self.user.username)
 
 
 #서비스 관련 모델1) 상품
 #모든 항목 not NULL
 class Product(models.Model) :
-    #자동 증가하는 ID일 경우 별도 생성X
     #choices 생성 for type
     TYPE_CHOICES = [
         ('OUTERWEAR', 'OUTERWEAR'),
@@ -28,15 +34,50 @@ class Product(models.Model) :
     price = models.IntegerField()
     color = models.CharField(max_length=10)
     size = models.CharField(max_length=3)
+    customer = models.ManyToManyField(Customer, through='Choice')#through 옵션 사용
     #+적립금..?
+    class Meta:
+        db_table = 'products'
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
+        ordering = ['id']
 
-#서비스 관련 모델2) 주문 (유저모델과 1을 연결할 mapping table), N:M 관계 아직 못함..
+    def __str__(self):
+        return 'id:{} type:{}'.format(str(self.id), self.type)
+
+#서비스 관련 모델 추가) 선택(유저모델과 product를 연결할 mapping table)
+class Choice(models.Model):
+    #FK
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='choices')
+    #FK
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='choices')
+    quantity = models.IntegerField()
+
+    class Meta:
+        db_table = 'choices'
+        verbose_name = 'Choice'
+        verbose_name_plural = 'Choices'
+        ordering = ['id']
+
+    def __str__(self):
+        return 'customer:{} product:{}'.format(self.customer_id, self.product_id)
+
+#서비스 관련 모델2) 주문
 class Order(models.Model) :
     order_quantity = models.IntegerField()
-    order_addr = models.CharField(max_length=50)
+    order_addr = models.CharField(max_length=100)
     date_of_order = models.DateTimeField(auto_now=True)#저장될 때마다 자동으로 필드에 현재 시간 설정
     #+FK :고객ID
-    #+FK :상품ID
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
+
+    class Meta:
+        db_table = 'orders'
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+        ordering = ['id']
+
+    def __str__(self):
+        return str(self.id)
 
 #서비스 관련 모델3) 장바구니 (유저 모델과 1:1 관계)
 class Cart(models.Model) :
@@ -44,6 +85,11 @@ class Cart(models.Model) :
     total_payment = models.IntegerField()
     #+고객ID: PK 이자 FK
     customer = models.OneToOneField(Customer, primary_key=True, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'carts'
+        verbose_name = 'Cart'
+        verbose_name_plural = 'Carts'
 
 #서비스 관련 모델4) 상품 리뷰
 class Reviews(models.Model) :
@@ -54,16 +100,27 @@ class Reviews(models.Model) :
     #+상품ID : FK
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews')
 
+    class Meta:
+        db_table = 'reviews'
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
+
 
 #서비스 관련 모델5) 상품 문의
-class QnA(models.Model) :
+class Question(models.Model) :
     title = models.CharField(max_length=100)
     content = models.TextField()
-    date_of_QnA = models.DateTimeField(auto_now=True)
+    date_of_question = models.DateTimeField(auto_now=True)
     #+고객ID: FK
-    customer = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='QnA')
+    customer = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='questions')
     #+상품ID: FK
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='QnA')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='questions')
+
+    class Meta:
+        db_table = 'questions'
+        verbose_name = 'Question'
+        verbose_name_plural = 'Questions'
+
 
 #서비스 관련 모델6) 문의 답변
 class Answer(models.Model) :
@@ -71,6 +128,12 @@ class Answer(models.Model) :
     date_of_ans = models.DateTimeField(auto_now=False)
     title = models.CharField(max_length=100)
     content = models.TextField()
-    #+QnAID : FK
-    qna = models.ForeignKey('QnA', on_delete=models.CASCADE, related_name='answers')
+    #+QuestionID : FK
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='answers')
+
+    class Meta:
+        db_table = 'answers'
+        verbose_name = 'Answer'
+        verbose_name_plural = 'Answers'
+
 
