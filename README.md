@@ -55,3 +55,54 @@ AttributeError: type object 'Product' has no attribute 'object'
 >>>
 
 ### 간단한 회고 
+
+===================================================================================
+3주차
+
+1. 선택한 모델
+
+# 제품란
+class Product(TimeStamp):
+    name = models.CharField(blank=True, max_length=255, null=True)
+    price = models.IntegerField()
+
+
+# 제품 포스트란
+class Post(TimeStamp):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    image = models.ImageField(blank=True)
+    caption = models.TextField(blank=True)
+    
+2. 모델 데이터
+(1) Product
+>>> Product.objects.values()
+<QuerySet [{'id': 1, 'create_at': datetime.datetime(2020, 10, 3, 21, 18, 16, 488690), 'updated_
+at': datetime.datetime(2020, 10, 3, 21, 18, 16, 488690), 'name': 'potato', 'price': 1000}, {'id
+': 2, 'create_at': datetime.datetime(2020, 10, 3, 21, 18, 26, 696604), 'updated_at': datetime.d
+atetime(2020, 10, 3, 21, 18, 26, 696604), 'name': 'watermelon', 'price': 4900}, {'id': 3, 'crea
+te_at': datetime.datetime(2020, 10, 3, 21, 18, 34, 388276), 'updated_at': datetime.datetime(202
+0, 10, 3, 21, 18, 34, 388276), 'name': 'pear', 'price': 3700}, {'id': 4, 'create_at': datetime.
+datetime(2020, 10, 3, 21, 18, 45, 116818), 'updated_at': datetime.datetime(2020, 10, 3, 21, 18,
+ 45, 116818), 'name': 'peach', 'price': 7200}, {'id': 5, 'create_at': datetime.datetime(2020, 1
+0, 3, 21, 18, 52, 154106), 'updated_at': datetime.datetime(2020, 10, 3, 21, 18, 52, 154106), 'n
+ame': 'banana', 'price': 4900}, {'id': 6, 'create_at': datetime.datetime(2020, 10, 3, 21, 19, 4
+, 755430), 'updated_at': datetime.datetime(2020, 10, 3, 21, 19, 4, 755430), 'name': 'mango', 'p
+rice': 29200}, {'id': 7, 'create_at': datetime.datetime(2020, 10, 3, 21, 19, 40, 515138), 'upda
+ted_at': datetime.datetime(2020, 10, 3, 21, 19, 40, 515138), 'name': 'orange', 'price': 8400}]>
+
+(2) Post 데이터
+>>> Post.objects.values()
+<QuerySet [{'id': 1, 'create_at': datetime.datetime(2020, 10, 3, 21, 27, 5, 733914), 'up
+dated_at': datetime.datetime(2020, 10, 3, 21, 27, 59, 501248), 'product_id': 1, 'image':
+ '', 'caption': 'peach from California, low price'}, {'id': 2, 'create_at': datetime.dat
+etime(2020, 10, 3, 21, 29, 35, 955463), 'updated_at': datetime.datetime(2020, 10, 3, 21,
+ 30, 21, 810793), 'product_id': 7, 'image': '', 'caption': '오렌지 먹은지 얼마나 오랜지'
+}, {'id': 3, 'create_at': datetime.datetime(2020, 10, 3, 21, 39, 16, 720784), 'updated_a
+t': datetime.datetime(2020, 10, 3, 21, 42, 32, 448990), 'product_id': None, 'image': '',
+ 'caption': 'watermelon from Russia, tasteful'}]>
+
+3. API
+(1) 모든 Post의 list를 갖고 오는 API
+![api1](./image/api1.PNG)
+
+(2) 특정 데이터를 가져오는 API
