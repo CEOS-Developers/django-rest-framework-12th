@@ -6,16 +6,16 @@ from .models import Product, Post
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'email']
+        fields = ['url', 'username', 'email', 'id']
 
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['product', 'caption']
+        fields = ['product', 'caption', 'id']
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'price']
+        fields = ['name', 'price', 'id']
