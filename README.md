@@ -280,7 +280,7 @@ class CommentList(APIView):
 
 ### 질문 
 
-- 모델 수정 질
+- 모델 수정 질문 
 ```python
 class Reservation(models.Model):
     user = models.ManyToManyField(User, blank=True)
