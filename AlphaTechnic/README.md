@@ -356,7 +356,7 @@ class Preference(models.Model):
         return str(self.user) + '.. : ' + str(self.post) + ' : \"' + str(self.likes) + '\" likes'
 ```
 
-![image-20201002190054613](C:\Users\juho3\AppData\Roaming\Typora\typora-user-images\image-20201002190054613.png)
+![image-20201002190054613](./markdown_img/image-20201002190054613.png)
 
 
 
@@ -456,7 +456,7 @@ class Preference(models.Model):
 	- URL: `api/post/<int:pk>`
 	- Method: `DELETE`
 
-![image-20201002202807856](C:\Users\juho3\AppData\Roaming\Typora\typora-user-images\image-20201002202807856.png)
+![image-20201002202807856](./markdown_img/image-20201002202807856.png)
 
 
 
@@ -481,8 +481,8 @@ class Preference(models.Model):
 ### 공부한 내용 정리
 
 - `ModelSerializer`를 통한 `JSON` 직렬화
-    - DRF에서는 `ModelSerializer`를 통해 `JSONRenderer`에서 변환 가능한 형태로 먼저 데이터를 벼환한다.
-    - Serializer는 장고의 Form과 유사하며, `ModelSerializer`는 장고의 `ModelForm`과 유사하다.
+    - DRF에서는 `ModelSerializer`를 통해 `JSONRenderer`에서 변환 가능한 형태로 먼저 데이터를 변환한다.
+    - `Serializer`는 장고의 Form과 유사하며, `ModelSerializer`는 장고의 `ModelForm`과 유사하다.
     - 둘의 결정적인 차이는 
         - `Form`은 `html`을 생성하고
         - `Serializer`는 `JSON` 문자열을 생성하는 차이
@@ -507,7 +507,7 @@ class Preference(models.Model):
         - 이러한 것들을 자동으로 처리하는 기능들이 `rest_framework.mixins`에 구현되어 있다.
         - 이름이 직관적으로 구성되어있다.
 
-    - gemerics APIView
+    - `generics APIView`
 
         - `Mixin`을 상속함으로서 반복되는 내용이 많이 줄어든다.
         - 하지만, 여러가지를 상속해야하다보니 가독성이 떨어진다.
@@ -556,3 +556,11 @@ class Preference(models.Model):
 
 1. 웹API를 통해서 서버와 클라이언트가 요청/응답을 주고 받는다는 데,  APIViwer의 구체적인 쓰임이 어떻게 될지 아직 감이 잘 오지 않는다.
 2. django admin에서 데이터 조회 및 수정, 삭제가 가능한데, 왜 번거롭게 APIViewr를 만드는 것일까..?
+
+
+
+### 피드백
+
+1. url 명을 posts라고 해야 RESTful한 작명이 된다.
+2. README.md 내의 이미지가 github에도 올라갈 수 있게 git의 관리를 받고 있는 폴더 안에 img파일을 둔다.
+3. 
