@@ -3,8 +3,8 @@ from . import views
 
 urlpatterns = [
     # 각 클래스에 대해 as_view로 라우팅
-    path('api/post/', views.PostListAPIView.as_view()),
-    path('api/post/<int:pk>/', views.PostDetailAPIView.as_view()),
+    path('api/posts/', views.PostListAPIView.as_view()),
+    path('api/posts/<int:pk>/', views.PostDetailAPIView.as_view()),
 ]
 
 # from rest_framework.routers import DefaultRouter
