@@ -12,7 +12,7 @@ from .models import Customer, Product, Choice
 
 #User
 class UserListAPIView(APIView):
-    def get(self, request, format=None):
+    def get(self, request, format=None):#urls.py에서 format_suffix_patterns 사용하기 위해 format=None 쓰임
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
