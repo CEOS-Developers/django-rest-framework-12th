@@ -34,7 +34,6 @@ class Follow(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
 
-
 # views.py
 def get_queryset(self):
     user = self.request.user
