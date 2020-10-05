@@ -89,7 +89,7 @@ from django.contrib.auth.models import User
 from PIL import Image ## image를 재가공할 수 있는 패키지 설치
 
 
-class Profile(models.Model):
+class Profile(models.Model):  # profile
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='default.png', upload_to="users/profile_pic")
     ## 이미지 등록 안했을 경우의 default 이미지를 설정해줌.
@@ -118,8 +118,8 @@ class Profile(models.Model):
 
 class Follow(models.Model):
     ## User를 통해 user 혹은 follow_user를 역참조하기 위한 related_name 설정
-    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
-    follow_user = models.ForeignKey(User, related_name='follow_user', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE) # 이름을 좀더 명확히
+    follow_user = models.ForeignKey(User, related_name='follow_user', on_delete=models.CASCADE) 
     date = models.DateTimeField(auto_now_add=True)
 ```
 
@@ -221,3 +221,338 @@ Out[10]: 0
 2. mysql workbench가 내가 생성한 모델들을 table로 보여주어서, 해당 속성에 어떻게 접근해야하는지 쉽게 알 수 있었다.
 3. ForeignKey가 model을 어떻게 만들어 주는지 더 와닿게 느끼게 되었다.
 
+
+
+### 피드백
+
+이름을 좀 더 명확히 (related_name)
+
+follow, followee field를 묶을 수 있도록
+
+
+
+
+
+## 3주차 과제 (기한: 10/2 금요일까지)
+
+----------------
+
+### APIView 만들기
+
+- `APIView`의 구성
+
+    ```
+    - api/post/ 에 대한 CBV
+        - get : Post 목록을 가져옴.
+        - post : 새로운 Post를 생성
+    	
+    - api/post/<int:pk> 에 대한 CBV
+        - get : 해당 pk Post 내용 가져옴.
+        - put : 해당 pk Post 수정
+        - delete : 해당 pk Post 삭제
+    ```
+
+    
+
+- `views.py`
+
+```python
+from .models import Post
+from .serializers import PostSerializer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+
+
+class PostListAPIView(APIView):
+    def get(self, request):
+        serializer = PostSerializer(Post.objects.all(), many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
+
+class PostDetailAPIView(APIView):
+    def get_object(self, pk):
+        return get_object_or_404(Post, pk=pk)
+
+    def get(self, request, pk, format=None):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        post = self.get_object(pk)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+```
+
+
+
+### 모델 선택 및 데이터 삽입 
+
+(선택한 모델의 구조와 데이터 삽입 후의 결과화면을 보여주세요!)
+
+- `models.py`
+
+```python
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+
+
+class Post(models.Model):
+    content = models.TextField(max_length=1000)
+    posted_date = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes = models.IntegerField(default=0)
+    dislikes = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.content[:15] + '...'
+
+    def num_of_comments(self):
+        return Comment.objects.filter(connected_post=self).count()
+
+    @property
+    def comments(self):
+        return Comment.objects.filter(connected_post=self)
+
+
+class Comment(models.Model):
+    connected_post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    content = models.TextField(max_length=150)
+    posted_date = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.content[:15] + '.. -> ' + str(self.connected_post)[:8] + '..'
+
+
+class Preference(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    likes = models.IntegerField(default=0)
+    date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.user) + '.. : ' + str(self.post) + ' : \"' + str(self.likes) + '\" likes'
+```
+
+![image-20201002190054613](C:\Users\juho3\AppData\Roaming\Typora\typora-user-images\image-20201002190054613.png)
+
+
+
+### 모든 list를 가져오는 API
+
+(API 요청한 URL과 결과 데이터를 코드로 보여주세요!)
+
+- URL: `api/post/`
+- Method: `GET`
+
+```python
+[
+    {
+        "id": 7,
+        "content": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularis",
+        "posted_date": "2020-09-24T15:44:28",
+        "likes": 0,
+        "dislikes": 0,
+        "author": 1
+    },
+    {
+        "id": 8,
+        "content": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like)",
+        "posted_date": "2020-09-24T15:44:42",
+        "likes": 0,
+        "dislikes": 0,
+        "author": 1
+    },
+    {
+        "id": 9,
+        "content": "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bo",
+        "posted_date": "2020-09-24T15:44:58",
+        "likes": 0,
+        "dislikes": 0,
+        "author": 4
+    },
+    {
+        "id": 10,
+        "content": "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, mak",
+        "posted_date": "2020-09-24T15:45:23",
+        "likes": 0,
+        "dislikes": 0,
+        "author": 5
+    }
+]
+```
+
+
+
+### 특정한 데이터를 가져오는 API
+
+(API 요청한 URL과 결과 데이터를 코드로 보여주세요!)
+
+- URL: `api/post/<int:pk>`
+- Method: `GET`
+
+```python
+{
+    "id": 7,
+    "content": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularis",
+    "posted_date": "2020-09-24T15:44:28",
+    "likes": 0,
+    "dislikes": 0,
+    "author": 1
+}
+```
+
+
+
+### 새로운 데이터를 create하도록 요청하는 API
+
+(요청한 URL 및 Body 데이터의 내용과 create된 결과를 보여주세요!)
+
+- URL: `api/post/`
+- Method: `POST`
+- Body: { "id": 11, "content": "새로 생성한 content 입니다", "posted_date": "2020-09-24T15:44:28", "likes": 0, "dislikes": 0, "author": 1}
+
+```python
+{
+    "id": 11,
+    "content": "새로 생성한 content 입니다",
+    "posted_date": "2020-09-24T15:44:28",
+    "likes": 0,
+    "dislikes": 0,
+    "author": 1
+}
+```
+
+
+
+### (선택) 특정 데이터를 삭제 또는 업데이트하는 API
+
+(위의 과제와 마찬가지로 요청 URL 및 결과 데이터를 보여주세요!)
+
+
+- 삭제
+	- URL: `api/post/<int:pk>`
+	- Method: `DELETE`
+
+![image-20201002202807856](C:\Users\juho3\AppData\Roaming\Typora\typora-user-images\image-20201002202807856.png)
+
+
+
+- 업데이트
+      - URL: `api/post/<int:pk>`
+      - Method: `PUT`
+      - Body: "{"id": 7,  "content": "새로 업데이트 한 content 입니다", "posted_date": "2020-09-24T15:44:28", "likes": 0, "dislikes": 0, "author": 1}"
+
+```python
+{
+    "id": 7,
+    "content": "새로 업데이트 한 content 입니다",
+    "posted_date": "2020-09-24T15:44:28",
+    "likes": 0,
+    "dislikes": 0,
+    "author": 1
+}
+```
+
+  
+
+### 공부한 내용 정리
+
+- `ModelSerializer`를 통한 `JSON` 직렬화
+    - DRF에서는 `ModelSerializer`를 통해 `JSONRenderer`에서 변환 가능한 형태로 먼저 데이터를 벼환한다.
+    - Serializer는 장고의 Form과 유사하며, `ModelSerializer`는 장고의 `ModelForm`과 유사하다.
+    - 둘의 결정적인 차이는 
+        - `Form`은 `html`을 생성하고
+        - `Serializer`는 `JSON` 문자열을 생성하는 차이
+
+
+
+- APIView
+    - CBV 중 하나이기 때문에 URL에 대해서만 처리할 수 있다.
+    - view에 여러가지 기본 설정을 부여하여, 상황에 맞춰서 커스튬하여 사용하게 된다. 
+    - 요청 method에 맞게 멤버함수를 정의하면 해당 method로 request가 들어올 때 함수들이 호출 된다.
+
+
+
+- APIViewer의 대안들
+    - `@api_view` 장식자
+
+        - FBV에 대해서 사용하는 장식자이다.
+
+    - `Mixins` 상속
+
+        - `APIView`를 보면 각 request method마다 직접 serializer 처리를 해주고 있다.
+        - 이러한 것들을 자동으로 처리하는 기능들이 `rest_framework.mixins`에 구현되어 있다.
+        - 이름이 직관적으로 구성되어있다.
+
+    - gemerics APIView
+
+        - `Mixin`을 상속함으로서 반복되는 내용이 많이 줄어든다.
+        - 하지만, 여러가지를 상속해야하다보니 가독성이 떨어진다.
+        - `rest_framework`에서는 저들을 상속한 새로운 클래스를 정의해 놓았다.
+
+    - `ViewSet`
+
+        - generic APIView는 코드를 상당히 많이 간소화해주지만, 아직 queryset과 serializer_class가 공통적인 데도 불구하고, 따로 기재해주어야한다.
+
+        - 이를 ViewSet은 한번에 처리를 해준다.
+
+        - views.py
+
+            ```python
+            from .models import Post
+            from .serializers import PostSerializer
+            from rest_framework import viewsets
+            
+            class PostViewSet(viewsets.ModelViewSet):
+                queryset = Post.objects.all()
+                serializer_class = PostSerializer
+            ```
+
+        - Router를 통해서 하나의 url로 처리가 가능하다.
+
+        - urls.py
+
+            ```python
+            from django.urls import path, include
+            from . import views
+            from rest_framework.routers import DefaultRouter
+            
+            router = DefaultRouter()
+            router.register('viewset',views.PostViewSet)
+            
+            urlpatterns = [
+                path('',include(router.urls)),
+            ]
+            ```
+
+            
+
+    
+
+### 간단한 회고
+
+1. 웹API를 통해서 서버와 클라이언트가 요청/응답을 주고 받는다는 데,  APIViwer의 구체적인 쓰임이 어떻게 될지 아직 감이 잘 오지 않는다.
+2. django admin에서 데이터 조회 및 수정, 삭제가 가능한데, 왜 번거롭게 APIViewr를 만드는 것일까..?
