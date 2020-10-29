@@ -9,7 +9,7 @@ from rest_framework import routers
 # ]
 
 # Viewset url patterns
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'routine', views.RoutineViewSet)
 
 urlpatterns = router.urls
