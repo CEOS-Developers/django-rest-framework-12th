@@ -23,7 +23,7 @@ class Routine(models.Model):
     name = models.CharField(max_length=128, null=True, blank=True)
     bgImage = models.IntegerField(default=0)
     doneAt = models.DateTimeField(null=True, blank=True)
-    createdAt = models.DateTimeField(null=True, blank=True)
+    createdAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
         return self.name
