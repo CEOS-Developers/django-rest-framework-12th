@@ -213,3 +213,101 @@ RESULT :
 - Serializer와 View를 만들(복붙하)고 URL mapping만 했을 뿐인데 CRUD가 구현이 된다니 놀랐습니다.
 - 지금까지 URL에 routine/insert, routine/delete 등으로 행위를 담아 표현했었는데 HTTP METHOD로 깔끔하게 CRUD를 표현해보 REST API의 철학(?)을 조금은 이해한 기분이었습니다.  
 - CRUD가 아니라 로그인 등 로직이 들어간 요청은 어떻게 RESTful하게 처리하는지 조금 궁금해졌습니다.
+
+
+## 4주차 과제
+
+### ViewSet으로 리팩토링
+#### 1. ViewSet class
+- 아래와 같이 RoutineViewSet 클래스를 정의했다.
+    -```python
+        class RoutineViewSet(viewsets.ModelViewSet) :
+            serializer_class = RoutineSerializer
+            queryset = Routine.objects.all()
+        ``` 
+
+
+#### 2. url mapping
+- urls.py에 아래와 같이 DefaultRouter를 이용하여 url을 매핑해주었다.
+    - ```python
+        router = routers.DefaultRouter()
+        router.register(r'routine', views.RoutineViewSet)
+        
+        urlpatterns = router.urls
+        ```
+
+#### 3. show_ulrs로 url mapping 확인하기
+- show_urls 를 사용하려면 django_extensions를 설치해야 한다.
+    - ```
+        INSTALLED_APPS = [
+            ...
+            'django_extensions',
+        ]
+        ```
+- url이 잘 매핑된 모습
+    - ```python
+        /api/routine    api.views.RoutineViewSet        routine-list
+        /api/routine/<pk>       api.views.RoutineViewSet        routine-detail
+        /api/routine/<pk>\.<format>/    api.views.RoutineViewSet        routine-detail
+        /api/routine\.<format>/ api.views.RoutineViewSet        routine-list
+        ```
+
+
+#### 4. 주의점. trailing_slash
+- 지난번 김지현 교수님께서 마지막 slash를 고려하는 것에 대해 말씀해주셨는데 식견이 부족하여 이해를 못했었다.
+    - 그런데 ViewSet으로 리팩토링한 후 slash를 붙이지 않으면 아래와 같이 요청이 먹히지 않았다..!
+    - ```
+        RuntimeError: You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH set. Django can't redirect to the slash URL while maintaining POST data. Change your form to point to 127.0.0.1:8000/api/routine/ (note the trailing slash), or set APPEND_SLASH=False in your Django settings.
+      ```
+    - 에러 내용대로 trailing_slash에 대해 처리해주어야 한다.
+    - ```python
+        router = routers.DefaultRouter(trailing_slash=False)
+        ```
+- ![](./img/delete.png)
+
+### @action 추가
+- 아래와 같이 오늘 추가된 루틴을 select 하는 action을 만들어봤다.
+    - ```python
+        class RoutineViewSet(viewsets.ModelViewSet) :
+            serializer_class = RoutineSerializer
+            queryset = Routine.objects.all()
+        
+        # add action
+        @action(methods=['get'], detail=False, url_name='', url_path='')
+        def list_created_today(self, request, *args, **kwargs):
+            routines = Routine.objects.filter(
+                createdAt__year=datetime.today().year,
+                createdAt__month = datetime.today().month,
+                createdAt__day = datetime.today().day
+            )
+            serializer = RoutineSerializer(routines, many=True)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+        ```
+
+- createdAt 필드의 시간이 아닌 날짜만 같으면 되므로 아래와 같이 3개의 조건을 필터에 써주어야 한다.
+    - ```python
+        routines = Routine.objects.filter(
+            createdAt__year = datetime.today().year,
+            createdAt__month = datetime.today().month,
+            createdAt__day = datetime.today().day
+        )  
+        ```
+    - 아니 갑자기 무슨 언더스코어 두개를 썼더니 그 datetime 필드에 있는 year, month, day에 접근이 가능하다??
+        - 닥스 링크 : https://docs.djangoproject.com/en/3.1/topics/db/queries/#lookups-that-span-relationships
+
+ - action을 추가한 후 show_urls
+    - ```
+        /api/routine    api.views.RoutineViewSet        routine-list
+        /api/routine/<pk>       api.views.RoutineViewSet        routine-detail
+        /api/routine/<pk>\.<format>/    api.views.RoutineViewSet        routine-detail
+        /api/routine/list_created_today api.views.RoutineViewSet        routine-list-created-today
+        /api/routine/list_created_today\.<format>/      api.views.RoutineViewSet        routine-list-created-today
+        /api/routine\.<format>/ api.views.RoutineViewSet        routine-list
+      ```
+ - 실행 결과
+    - ![](./img/action.png)
+    
+    
+ - 간단한 회고
+    1. 몇 주만에 파이썬 & 장고를 보니 싸웠던 친구를 만난 것처럼 어색했다...
+    2. 하지만 역시 하다보니 파이썬 갓갓 장고 갓갓.
