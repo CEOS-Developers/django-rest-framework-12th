@@ -1,31 +1,34 @@
 from django.shortcuts import render
 
 # Create your views here.
-
-
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Routine
 from .Serializers import RoutineSerializer
+from rest_framework import viewsets
 
+class RoutineViewSet(viewsets.ModelViewSet) :
+    serializer_class = RoutineSerializer
+    queryset = Routine.objects.all()
 
 class RoutineList(APIView):
     """
-    게시물 생성
+    insert routine
     /routine/
     """
     def post(self, request, format=None):
         serializer = RoutineSerializer(data=request.data)
         print(request.data)
+        # raise_excptions 이용하면 코드 간소화 가능
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     """
-    게시물 조회
+    selsect all routine
     /routine/
     """
     def get(self, request, format=None):
@@ -42,7 +45,7 @@ class RoutineDetail(APIView):
             raise Http404
 
     """
-    특정 게시물 조회
+    select rotuine
     /routine/{pk}/
     """
     def get(self, request, pk):
@@ -51,7 +54,7 @@ class RoutineDetail(APIView):
         return Response(serializer.data)
 
     """
-    특정 게시물 수정
+    update rotine
     /routine/{pk}/
     """
     def put(self, request, pk, format=None):
@@ -63,7 +66,7 @@ class RoutineDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     """
-    특정 게시물 삭제
+    delete routine
     /routine/{pk}/
     """
     def delete(self, request, pk, format=None):

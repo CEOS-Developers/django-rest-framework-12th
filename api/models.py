@@ -18,7 +18,7 @@ class Profile(models.Model):
 
 
 class Routine(models.Model):
-    profile = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='routines')
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='routines')
     uuid = models.CharField(max_length=128)
     name = models.CharField(max_length=128, null=True, blank=True)
     bgImage = models.IntegerField(default=0)
