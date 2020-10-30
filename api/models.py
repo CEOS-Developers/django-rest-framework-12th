@@ -16,21 +16,23 @@ class Customer(models.Model) :
     def __str__(self):
         return 'id:{} name:{}'.format(str(self.user.id), self.user.username)
 
+#서비스 관련 모델 추가)
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'categories'
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+        ordering = ['id']
+
+    def __str__(self):
+        return 'category : {}'.format(self.name)
 
 #서비스 관련 모델1) 상품
 #모든 항목 not NULL
-class Product(models.Model) :
-    #choices 생성 for type
-    TYPE_CHOICES = [
-        ('OUTERWEAR', 'OUTERWEAR'),
-        ('TOPS', 'TOPS'),
-        ('SHIRTS', 'SHIRTS'),
-        ('BOTTOMS', 'BOTTOMS'),
-        ('SKIRTS', 'SKIRTS'),
-        ('DRESSES', 'DRESSES'),
-        ('BAGS', 'BAGS'),
-    ]
-    type = models.CharField(max_length=9, choices=TYPE_CHOICES, default='TOPS')
+class Product(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     price = models.IntegerField()
     color = models.CharField(max_length=10)
     size = models.CharField(max_length=3)
@@ -40,10 +42,13 @@ class Product(models.Model) :
         db_table = 'products'
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
-        ordering = ['id']
+        ordering = ['id']#오름차순 정렬
 
     def __str__(self):
-        return 'id:{} type:{}'.format(str(self.id), self.type)
+        return 'id:{} {}'.format(self.id, self.category)
+
+
+
 
 #서비스 관련 모델 추가) 선택(유저모델과 product를 연결할 mapping table)
 class Choice(models.Model):
@@ -90,6 +95,9 @@ class Cart(models.Model) :
         db_table = 'carts'
         verbose_name = 'Cart'
         verbose_name_plural = 'Carts'
+
+    def __str__(self):
+        return 'user:{}'.format(self.customer)
 
 #서비스 관련 모델4) 상품 리뷰
 class Reviews(models.Model) :
