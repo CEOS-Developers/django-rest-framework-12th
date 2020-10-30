@@ -25,14 +25,14 @@ Answer: 답변 / PK: id(BigAutoField)
 
 <모델 간 관계>
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/8c157250-f1b4-4c2b-a418-879cc497e262/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200926%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200926T083622Z&X-Amz-Expires=86400&X-Amz-Signature=9e8d41c5665da24c32c40fa17a9a4a50dff754935b21fb82e3532fe13e68ae0f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![modeling](./img/modeling.jpg)
 
 ### ORM 적용해보기
 1.데이터베이스에 Reviews 모델 객체 3개 생성
 
 순서: User 모델 객체 2개 생성 → Customer 모델 객체 2개 생성 → Product 모델 객체 2개 생성 → Reviews 모델 객체 3개 생성
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/13a9858d-c729-4bda-8bea-cb9021ac2d7c/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200926%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200926T083306Z&X-Amz-Expires=86400&X-Amz-Signature=f4e78f6d9fd8e485864de8781e520f202b6ee0d2e82ee6c005326b785ff37f08&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![create_customers](./img/create_customers.jpg)
 
 ```python
 from api.models import Customer
@@ -41,9 +41,7 @@ c2 = Customer(user=u2, name = "Snoopy", addr = "Gwangjin-gu", membership = "Gold
 
 ```
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/6c83a6e2-803a-4ada-9ec3-33bde7fbb991/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200926%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200926T083416Z&X-Amz-Expires=86400&X-Amz-Signature=0a1c44610433ec7e1b2106704784ce0bea5d0c1aacae1f6642245f0fb046ae5c&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
-
-
+![create_product](./img/create_product.jpg)
 
 ```python
 from api.models import Product
@@ -51,7 +49,7 @@ p1 = Product(id="a", type = "shirts", price = 5000, color = "black", size="L")
 p2 = Product(id = "aa", type = "shirts" price = 5500, color = "white", size="M")
 ```
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/cb7a5f45-5084-4d95-9b67-c2ac2b7b0198/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200926%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200926T083521Z&X-Amz-Expires=86400&X-Amz-Signature=a6f345eb3840d5c80c61c0aeba1fb1c0ce247b69cdc87b094568543fe0e3428d&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![create_reivews](./img/create_reviews.jpg)
 
 ```python
 from api.models import Reviews
@@ -62,17 +60,18 @@ Reviews.objects.create(rating = 5.0, content = "I like it!", customer = c2, prod
 
 2.삽입한 객체들 쿼리셋으로 조회하기
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/314a3417-f8fd-4152-9e8e-9b0f1e09fc8f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200926%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200926T084835Z&X-Amz-Expires=86400&X-Amz-Signature=83ae95d0b55210c5ba95fbf3dc0fa411ebae43f8b08c553f017b5413a81c0de0&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![using_queryset](./img/using_queryset.jpg)
 
-
+Reviews 모델의 객체들을 rating(평점)을 기준으로 내림차순으로 조회함
 
 3.filter 함수 사용하기
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c59b7327-18b2-463f-85cb-6414c42e5043/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200926%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200926T085157Z&X-Amz-Expires=86400&X-Amz-Signature=f2976280a6258d91b18dee16f1ba996da8fcec4235a1cc865532ad7822708ce0&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22) 
+![using_filterfunc](./img/using_filterfunc.jpg)
 
 
 
 ### 간단한 회고 
+
 구상한 서비스에 필요한 모델들을 직접 구상하는 것이 낯설었고, 모델 관의 정확한 관계, PK와 FK를 정확히 지정하는 것이 중요하다는 것을 깨달았다. 
 
 
@@ -145,9 +144,9 @@ class Choice(models.Model):
         
 ```
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/02ee76ce-4150-45f7-aef8-d430b0b1e13d/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20201002%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201002T113240Z&X-Amz-Expires=86400&X-Amz-Signature=0aa95c75464cb9314fd2df206b8de0f9bdb76dbf666bdd1779842895728040ab&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22) 
+![choices_objects](./img/choices_objects.jpg)
 
-
+![choices_objects_adminpage](./img/choices_objects_adminpage.jpg)
 
 
 
@@ -303,7 +302,9 @@ URL: api/choices/5/
 
 Method: DELETE
 
-![img](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/e07b9411-eb56-4353-9cd0-5d17ea55e21e/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20201002%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201002T113110Z&X-Amz-Expires=86400&X-Amz-Signature=586b9c064b5899da4f6162539d327ad9c9e511c8a632f8ccc6f81b06db722ecf&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22) 
+![delete_api](./img/delete_api.jpg)
+
+
 
 ### 공부한 내용 정리
 
