@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
-from .models import Customer, Product, Choice
+from .models import Customer, Product, Category, Choice, Cart
 from rest_framework import serializers
 
+#ModelSerializer 사용
 class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -19,7 +20,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'type', 'price', 'color', 'size')
+        fields = ('id', 'category', 'price', 'color', 'size')
 
 class ChoiceSerializer(serializers.ModelSerializer):
 
@@ -27,6 +28,17 @@ class ChoiceSerializer(serializers.ModelSerializer):
         model = Choice
         fields = "__all__"#모든 필드 serialize
 
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+class CartSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cart
+        fields = "__all__"
 
 
 
