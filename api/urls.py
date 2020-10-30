@@ -1,20 +1,22 @@
-from django.urls import path, include
+#from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
-#from .views import UserDetailAPIView, UserListAPIView
+from rest_framework import routers
 from . import views
 
-urlpatterns = [
-    path('users/', views.UserListAPIView.as_view()),
-    path('users/<int:pk>/', views.UserDetailAPIView.as_view()),
-    path('customers/', views.CustomerListAPIView.as_view()),
-    path('customers/<int:pk>/', views.CustomerDetailAPIView.as_view()),
-    path('products/', views.ProductListAPIView.as_view()),
-    path('products/<int:pk>/', views.ProductDetailAPIView.as_view()),
-    path('choices/', views.ChoiceListAPIView.as_view()),
-    path('choices/<int:pk>/', views.ChoiceDetailAPIView.as_view()),
+#create a router and register our viewsets with it
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'customers', views.CustomerViewSet)
+router.register(r'products', views.ProductViewSet)
+router.register(r'choices', views.ChoiceViewSet)
+router.register(r'categories', views.CategoryViewSet)
+router.register(r'carts', views.CartViewSet)
 
-]
+#The API URLs are now determined automatically by the router
+urlpatterns = router.urls
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+
+
+#urlpatterns = format_suffix_patterns(urlpatterns)
 
 
