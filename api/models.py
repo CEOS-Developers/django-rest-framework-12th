@@ -86,8 +86,8 @@ class Order(models.Model) :
 
 #서비스 관련 모델3) 장바구니 (유저 모델과 1:1 관계)
 class Cart(models.Model) :
-    total_quantity = models.IntegerField()
-    total_payment = models.IntegerField()
+    total_quantity = models.IntegerField(default=0)
+    total_payment = models.IntegerField(default=0)
     #+고객ID: PK 이자 FK
     customer = models.OneToOneField(Customer, primary_key=True, on_delete=models.CASCADE)
 
