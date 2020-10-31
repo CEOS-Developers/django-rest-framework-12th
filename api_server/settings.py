@@ -52,7 +52,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
-    'api.apps.ApiConfig',
+    'api.apps.ApiConfig',#생성 api app 추가
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,6 +60,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+#API 호출 시 JSON 형식으로만 보이게 하는 옵션
+"""
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES':(
+        'rest_framework.renderers.JSONRenderer',
+    )
+}
+"""
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

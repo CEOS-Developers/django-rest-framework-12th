@@ -22,6 +22,14 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'category', 'price', 'color', 'size')
 
+class CartSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cart
+        fields = "__all__"
+
+
+
 class ChoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -34,11 +42,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = "__all__"
 
-class CartSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Cart
-        fields = "__all__"
 
 
 
