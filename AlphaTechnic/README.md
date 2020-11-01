@@ -588,7 +588,7 @@ class Preference(models.Model):
 
 
 - `ViewSet`의 종류
-    
+  
     1. `viewsets.ReadOnlyModelViewSet`
         - 목록 : `mixins.ListModelMixin` -> list() 함수
         - 특정 레코드 : `mixins.RetrieveModelMixin` -> retrieve() 함수
@@ -617,7 +617,7 @@ class Preference(models.Model):
 
     Router를 사용하게 되면, Api Root를 제공해준다. 해당 app에 대한 root url로 갈 경우 Router에 등록된 ViewSet을 확인할 수 있다.
 
-    ![image-20201031231001820](.\markdown_img\image-20201031231001820.png)
+    ![image-20201031231001820](./markdown_img/image-20201031231001820.png)
 
 
 
@@ -790,7 +790,7 @@ class Preference(models.Model):
 
 - posts/{pk}/add_dislikes/
 
-![image-20201031230613257](.\markdown_img\image-20201031230613257.png)
+![image-20201031230613257](./markdown_img/image-20201031230613257.png)
 
 해당 post의 dislikes가 하나 증가하였다.
 
