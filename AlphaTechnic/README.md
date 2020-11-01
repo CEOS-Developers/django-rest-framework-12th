@@ -772,19 +772,19 @@ class Preference(models.Model):
 
 - posts/popular/
 
-![image-20201031223704542](.\markdown_img\image-20201031223704542.png)
+![image-20201031223704542](./markdown_img/image-20201031223704542.png)
 
 좋아요 개수가 20개 이상인 post가 조회되는 모습이다.
 
 - posts/today/
 
-![image-20201031224236291](.\markdown_img\image-20201031224236291.png)
+![image-20201031224236291](./markdown_img/image-20201031224236291.png)
 
 오늘 날짜에 생성된 post들이 조회되는 모습이다. 가장 최근에 생성된 것이 맨 위에 조회된다.
 
 - posts/{pk}/add_likes/
 
-![image-20201031230248695](.\markdown_img\image-20201031230248695.png)
+![image-20201031230248695](./markdown_img/image-20201031230248695.png)
 
 해당 post의 likes가 하나 증가하였다.
 
