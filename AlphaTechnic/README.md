@@ -356,7 +356,7 @@ class Preference(models.Model):
         return str(self.user) + '.. : ' + str(self.post) + ' : \"' + str(self.likes) + '\" likes'
 ```
 
-![image-20201002190054613](C:\Users\juho3\AppData\Roaming\Typora\typora-user-images\image-20201002190054613.png)
+![image-20201002190054613](./markdown_img/image-20201002190054613.png)
 
 
 
@@ -456,7 +456,7 @@ class Preference(models.Model):
 	- URL: `api/post/<int:pk>`
 	- Method: `DELETE`
 
-![image-20201002202807856](C:\Users\juho3\AppData\Roaming\Typora\typora-user-images\image-20201002202807856.png)
+![image-20201002202807856](./markdown_img/image-20201002202807856.png)
 
 
 
@@ -481,8 +481,8 @@ class Preference(models.Model):
 ### 공부한 내용 정리
 
 - `ModelSerializer`를 통한 `JSON` 직렬화
-    - DRF에서는 `ModelSerializer`를 통해 `JSONRenderer`에서 변환 가능한 형태로 먼저 데이터를 벼환한다.
-    - Serializer는 장고의 Form과 유사하며, `ModelSerializer`는 장고의 `ModelForm`과 유사하다.
+    - DRF에서는 `ModelSerializer`를 통해 `JSONRenderer`에서 변환 가능한 형태로 먼저 데이터를 변환한다.
+    - `Serializer`는 장고의 Form과 유사하며, `ModelSerializer`는 장고의 `ModelForm`과 유사하다.
     - 둘의 결정적인 차이는 
         - `Form`은 `html`을 생성하고
         - `Serializer`는 `JSON` 문자열을 생성하는 차이
@@ -507,7 +507,7 @@ class Preference(models.Model):
         - 이러한 것들을 자동으로 처리하는 기능들이 `rest_framework.mixins`에 구현되어 있다.
         - 이름이 직관적으로 구성되어있다.
 
-    - gemerics APIView
+    - `generics APIView`
 
         - `Mixin`을 상속함으로서 반복되는 내용이 많이 줄어든다.
         - 하지만, 여러가지를 상속해야하다보니 가독성이 떨어진다.
@@ -556,3 +556,241 @@ class Preference(models.Model):
 
 1. 웹API를 통해서 서버와 클라이언트가 요청/응답을 주고 받는다는 데,  APIViwer의 구체적인 쓰임이 어떻게 될지 아직 감이 잘 오지 않는다.
 2. django admin에서 데이터 조회 및 수정, 삭제가 가능한데, 왜 번거롭게 APIViewr를 만드는 것일까..?
+
+
+
+### 피드백
+
+1. url 명을 posts라고 해야 RESTful한 작명이 된다.
+2. README.md 내의 이미지가 github에도 올라갈 수 있게 git의 관리를 받고 있는 폴더 안에 img파일을 둔다.
+
+
+
+## 4주차 - DRF2 : ViewSet
+
+-----------
+
+### Viewset
+
+기존의 간단한 형태의 **CBV**에서는 **하나의 url에 하나의 View만을 매핑** (아래와 같음)
+
+- 리스트 url → 리스트 view(get/post)
+- 디테일 url → 디테일 view(get/post/put..)
+
+그러나, ViewSet은 하나의 뷰가 아닌 set, 여러 개의 뷰를 만들 수 있는 확장된 CBV이다. 이것이 as_view를 통해서 뷰를 만들지 않고, router를 사용하는 이유이다. 하지만 사실, ViewSet도 as_view를 사용하여 각각의 뷰를 만들어줄 수 있다.
+
+```python
+.as_view({
+	'http method': '함수'
+})
+```
+
+
+
+- `ViewSet`의 종류
+  
+    1. `viewsets.ReadOnlyModelViewSet`
+        - 목록 : `mixins.ListModelMixin` -> list() 함수
+        - 특정 레코드 : `mixins.RetrieveModelMixin` -> retrieve() 함수
+    2. `viewsets.ModelViewSet`
+        - 목록 : `mixins.ListModelMixin` -> list() 함수
+        - 특정 레코드 : `mixins.RetrieveModelMixin` : retrieve() 함수
+        - 레코드 생성 : `mixins.CreateModelMixin` : create() 함수
+        - 레코드 수정 : `mixins.UpdateModelMixin` : update() 함수, partial_update() 함수
+    - 레코드 삭제 : `mixins.DestroyModelMixin` : destroy() 함수
+    
+- Router
+
+    URL 매칭을 편리하게 할 수 있다. 기존에는 as_view를 통해 각 request method마다 대응되는 함수를 연결시켜주었다면 router는 이를 알아서 연결시켜준다. 
+
+    ```
+    - list route
+    	- url: /prefix/
+    	- name : {model name}-list
+    	'get':'list', 'post':'create'
+    	
+    - detail route
+    	- url : /prefix/pk/
+    	- name : {model name}-detail
+    	'get':'retrieve', 'put':'update', 'patch':'partial_update', 'delete':'destroy'
+    ```
+
+    Router를 사용하게 되면, Api Root를 제공해준다. 해당 app에 대한 root url로 갈 경우 Router에 등록된 ViewSet을 확인할 수 있다.
+
+    ![image-20201031231001820](./markdown_img/image-20201031231001820.png)
+
+
+
+- Decorator `@action`
+
+    default 매핑의 경우, list route에 대해서 2개, detail route에 대해서 4개를 매핑해주게 된다. 하지만, 실제로는 6개보다 더 많은 경우가 많다. 영화관 서비스를 예시로 하면, 
+
+    - 예시1 ) 
+
+        어떤 영화의 시작시간과 러닝타임을 가지고, 영화가 끝나는 시간을 response로 받아내는 액션을 만드려는 경우
+
+    - 예시2 )
+
+        request body에 업데이트 할 내용을 모두 넣어 update view에 접근하는 방식이 아닌, 해당 action과 매핑된 url에 접근함으로써 해당 자리가 예약되었음을 나타내는 필드만 빠르게 True로 바꾸는 액션을 만드려는 경우
+
+    
+
+    
+
+    1. **detail**
+
+        `action`은 첫번째 인자로 detail 값을 받는다. Boolean으로서 
+
+        - True일 경우, pk 값을 지정해주어야 하며,
+        - False인 경우, 목록 단위로 적용하게 된다.
+
+        ```
+        - detail=True
+        	- url : /prefix/{pk}/{function name}/
+        	- name : {model name}-{function name}
+        
+        - detail=False
+        	- url : /prefix/{function name}/
+        	- name : {model name}-{function name}
+        ```
+
+        
+
+    2. **methods**
+
+        request method를 지정해줄 수 있다. 디폴트 값은 get
+
+    
+
+    
+
+ ### 과제1. ViewSet으로 리팩토링 하기
+
+- models.py
+
+    ```python
+    from django.db import models
+    from django.utils import timezone
+    from django.contrib.auth.models import User
+    
+    
+    class Post(models.Model):
+        content = models.TextField(max_length=1000)
+        posted_date = models.DateTimeField(default=timezone.now)
+        author = models.ForeignKey(User, on_delete=models.CASCADE)
+        likes = models.IntegerField(default=0)
+        dislikes = models.IntegerField(default=0)
+    
+        def __str__(self):
+            return self.content[:15] + '...'
+    
+        def num_of_comments(self):
+            return Comment.objects.filter(connected_post=self).count()
+    
+        @property
+        def comments(self):
+            return Comment.objects.filter(connected_post=self)
+    ```
+
+- urls.py
+
+    ```python
+    from django.urls import path, include
+    from . import views
+    from rest_framework.routers import DefaultRouter
+    
+    router = DefaultRouter()
+    router.register(r'posts', views.PostViewSet)
+    
+    urlpatterns = [
+        path('',include(router.urls)),
+    ]
+    ```
+
+    url이 `/posts/today/...` 이런 식으로 디렉토리를 열듯 하위구조로 내려가는 듯한 뉘앙스가 있고, 이를 살려주어야 하기에 복수형(posts)으로 작명하였다.
+
+    
+
+### 과제2 `@action` 추가하기
+
+- views.py
+
+    ```python
+    from rest_framework import status
+    from rest_framework.viewsets import ModelViewSet
+    from rest_framework.decorators import action
+    from rest_framework.response import Response
+    from .models import Post
+    from .serializers import PostSerializer
+    import datetime
+    
+    
+    class PostViewSet(ModelViewSet):
+        queryset = Post.objects.all()
+        serializer_class = PostSerializer
+    
+        # url : posts/popular/
+        @action(detail=False)
+        def popular(self, request): # 좋아요 20개 이상 받은 인기 posts
+            qs = self.queryset.filter(likes__gt=20).order_by('-posted_date')[:10]
+            serializer = self.get_serializer(qs, many=True)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+    
+        # url : posts/today/
+        @action(detail=False)
+        def today(self, request): # 오늘 생성된 posts
+            today = datetime.date.today()
+            qs = self.queryset.filter(posted_date__gt=today).order_by('-posted_date')
+            serializer = self.get_serializer(qs, many=True)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+    
+        # url : posts/{pk}/add_likes/
+        @action(detail=True, methods=['get', 'patch'])
+        def add_likes(self, request, pk):  # 좋아요 하나 추가
+            obj = self.get_object()
+            obj.likes += 1
+            obj.save()
+            serializer = self.get_serializer(obj)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+    
+        # url : posts/{pk}/add_dislikes/
+        @action(detail=True, methods=['get', 'patch'])
+        def add_dislikes(self, request, pk):  # 싫어요 하나 추가
+            obj = self.get_object()
+            obj.dislikes += 1
+            obj.save()
+            serializer = self.get_serializer(obj)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+    
+    ```
+
+
+
+
+
+### 실행결과
+
+- posts/popular/
+
+![image-20201031223704542](./markdown_img/image-20201031223704542.png)
+
+좋아요 개수가 20개 이상인 post가 조회되는 모습이다.
+
+- posts/today/
+
+![image-20201031224236291](./markdown_img/image-20201031224236291.png)
+
+오늘 날짜에 생성된 post들이 조회되는 모습이다. 가장 최근에 생성된 것이 맨 위에 조회된다.
+
+- posts/{pk}/add_likes/
+
+![image-20201031230248695](./markdown_img/image-20201031230248695.png)
+
+해당 post의 likes가 하나 증가하였다.
+
+- posts/{pk}/add_dislikes/
+
+![image-20201031230613257](./markdown_img/image-20201031230613257.png)
+
+해당 post의 dislikes가 하나 증가하였다.
+
