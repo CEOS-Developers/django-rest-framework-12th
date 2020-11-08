@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Customer, Product, Choice
+from .models import Customer, Product, Choice, Category, Cart
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -12,4 +12,12 @@ class ChoiceAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['id', 'type', 'price', 'color', 'size']
+    list_display = ['id', 'category', 'price', 'color', 'size']
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['customer', 'total_quantity', 'total_payment']
