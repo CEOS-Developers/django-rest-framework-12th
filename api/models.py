@@ -40,7 +40,7 @@ class Rank(models.Model):
     is_major = models.BooleanField('전공 여부')
     is_included = models.BooleanField('전공자 정원 포함 여부')
     grade = models.IntegerField('학년')
-    success = models.BooleanField('수강 여부')
+    success = models.BooleanField('신청 성공 여부')
 
 
 class Result(models.Model):
@@ -61,7 +61,8 @@ class Major(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    lectures = models.ManyToManyField(Lecture, related_name='users')
+    # M:M은 자동으로 중간 모델을 생성해서 null값을 가질 수 없음
+    lectures = models.ManyToManyField(Lecture, related_name='users', blank=True)
     student_id = models.IntegerField('학번', unique=True)
     major = models.ForeignKey(Major, on_delete=models.CASCADE, related_name='users', verbose_name='전공')
     second_major = models.ForeignKey(Major, on_delete=models.SET_NULL, related_name='second_users',

@@ -133,6 +133,7 @@ class Professor(models.Model):
         return "{}, {}".format(self.name, self.department)
 ```
 ![lecture](api/img/lecture.PNG)
+
 ![lecture](api/img/lecture2.PNG)
 
 ### 모든 list를 가져오는 API
@@ -289,6 +290,121 @@ Serializer
 - 복잡한 데이터를 native python 자료형으로 변환해줌
 - 클라이언트 요청 -> queryset, 모델 인스턴스 -> native python 자료형 -> json, xml 반환 
 
+Content Type
+- 요청, 응답 헤더에 포함
+- 컨텐츠 타입(MIME)와 문자열 인코딩 명시
+
+Accept Header
+- 요청 헤더에 포함
+- 클라이언트가 허용할 수 있는 파일 형식(MIME) 명시 -> 처리할 응답 형식 선언
+
+Format suffix
+- 처리할 응답 파일 형식을 url에 추가
+
+Query parameter format
+- 파일 형식을 query string으로 전송
 
 ### 간단한 회고 
 자체 템플릿 ㄷㄷ
+dumpdata, loaddata
+
+## 4주차 과제
+
+### Viewset
+
+### url 매핑
+```python
+urls.py
+
+router = routers.DefaultRouter()
+router.register(r'lectures', LectureViewSet)  # r: raw string(\도 그대로 출력)
+router.register(r'profiles', ProfileViewSet)
+
+urlpatterns = router.urls
+```
+자동으로 2개의 url 생성
+- List - list, create -> url: lectures/ name: 'lecture-list'
+- Detail - retrieve, update, destroy -> url: lectures/{pk}/ name: 'lecture-detail'
+- prefix = lectures, basename = lecture
+
+### action 추가
+```python
+@action(methods=['post'], detail=False, url_path='method', url_name='method')
+```
+- methods: http method(default는 get)
+- detail: list인지 detail인지
+- url_path: lectures/method (default는 함수 이름)
+- url_name: 'lecture-method' (default는 함수 이름 _ -> -)
+
+![lecture](api/img/action.PNG)
+
+```python
+views.py
+
+class LectureViewSet(viewsets.ModelViewSet):
+    serializer_class = LectureSerializer
+    queryset = Lecture.objects.all()
+
+    @action(methods=['get'], detail=False, url_path='lecture-filter')  # detail: list인지 detail인지
+    def lecture_filter(self, request):  # 입력을 query string으로 받음
+        lecture_name = request.query_params.get('name')
+        # request.GET도 가능, request.data[~]는 body에 담긴 data 접근(POST)
+        if lecture_name is not None:
+            lectures = Lecture.objects.filter(name__icontains=lecture_name).order_by('grade')
+            # __icontains: 대소문자 구분 없이 포함 여부 확인
+            # filter(~__gt=~): greater than, lt(less than), gte(greater than equal), lte
+            serializer = LectureSerializer(lectures, many=True)
+            return Response(serializer.data)
+        return Response("검색 결과가 없습니다.")
+```
+![lecture](api/img/filter3.PNG)
+
+```python
+    @action(detail=True)
+    def result(self, request, pk):
+        lecture = get_object_or_404(Lecture, pk=pk)
+        result = lecture.result
+        serializer = ResultSerializer(result)
+        return Response(serializer.data)
+```
+![lecture](api/img/result.PNG)
+
+```python
+    @action(detail=True)
+    def rank(self, request, pk):
+        lecture = get_object_or_404(Lecture, pk=pk)
+        ranks = lecture.ranks.all().order_by('-mileage', 'grade')
+        serializer = RankSerializer(ranks, many=True)
+        return Response(serializer.data)
+```
+![lecture](api/img/rank.PNG)
+
+```python
+class ProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
+
+    @action(detail=True, url_path='mileage-cut')
+    def mileage_cut(self, request, pk):
+        mileage_cut = {}
+        user = get_object_or_404(Profile, pk=pk)
+        for lecture in user.lectures.all():
+            if lecture.result.include_second_major:
+                if user.major == lecture.department or user.second_major == lecture.department:
+                    mileage_cut[lecture.name] = lecture.ranks.filter(is_included=True, grade=user.grade, success=True
+                                                                     ).order_by('mileage')[0].mileage
+                else:
+                    mileage_cut[lecture.name] = lecture.ranks.filter(is_included=False, grade=user.grade, success=True
+                                                                     ).order_by('mileage')[0].mileage
+            else:
+                if user.major == lecture.department:
+                    mileage_cut[lecture.name] = lecture.ranks.filter(is_included=True, grade=user.grade, success=True
+                                                                     ).order_by('mileage')[0].mileage
+                else:
+                    mileage_cut[lecture.name] = lecture.ranks.filter(is_included=False, grade=user.grade, success=True
+                                                                     ).order_by('mileage')[0].mileage
+        return Response(mileage_cut)
+```
+![lecture](api/img/profile-detail.PNG)
+
+![lecture](api/img/mileage_cut.PNG)
