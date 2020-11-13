@@ -48,9 +48,12 @@ class ProductFilter(django_filters.FilterSet):
         }
 
     def my_custom_color(self, queryset, name, value):
+        """
         #construct the full lookup expression
         lookup = '__'.join([name, 'iexact'])
-        return queryset.filter(**{lookup: 'Black'})
+        return queryset.filter(**{lookup: 'orange'})
+        """
+        return queryset.filter(**{name: 'black'}) #다른 색깔 입력해도 왜 black 객체만 나오지..?
 
 #product
 class ProductViewSet(viewsets.ModelViewSet):
