@@ -51,6 +51,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_filters',
     'rest_framework',
     'api.apps.ApiConfig',#생성 api app 추가
     'django.contrib.admin',
