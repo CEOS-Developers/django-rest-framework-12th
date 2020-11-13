@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from .models import *
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-
 #post -> 생성, get -> 조회, put -> 수정, delete->삭제
 #ListAPIView:모델 객체 목록 조회 및 새로운 객체 생성(get, post) -> 목록에 대한
 #DetailAPIView:객체 내용, 수정, 삭제(get, put, delete) -> 특정 객체에 대한 
@@ -27,6 +26,31 @@ class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
 
 
+import django_filters
+from django_filters.rest_framework import FilterSet, filters
+from django_filters.rest_framework import DjangoFilterBackend
+
+class ProductFilter(django_filters.FilterSet):
+    category = django_filters.NumberFilter()
+    price = django_filters.NumberFilter()
+    color = django_filters.CharFilter(method='my_custom_color')
+
+    """
+    #밑의 Meta class의 fields 속성과 동일한 역할
+    category = django_filters.NumberFilter(field_name='category', lookup_expr='exact')
+    price = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
+    """
+    class Meta:
+        model = Product
+        fields = {
+            'price' : ['lte'], #generate 'price__lte' filters
+            'color' : ['iexact'] #generate 'color__iexact' filters
+        }
+
+    def my_custom_color(self, queryset, name, value):
+        #construct the full lookup expression
+        lookup = '__'.join([name, 'iexact'])
+        return queryset.filter(**{lookup: 'Black'})
 
 #product
 class ProductViewSet(viewsets.ModelViewSet):
@@ -39,6 +63,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         products = Product.objects.all().filter(category=pk)
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
 
 #Category
 class CategoryViewSet(viewsets.ModelViewSet):
