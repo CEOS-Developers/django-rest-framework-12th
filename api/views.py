@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from .models import Customer, Product, Choice, Category, Cart
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework import permissions
+from .permissions import IsAuthenticated, AllowAny
 #post -> 생성, get -> 조회, put -> 수정, delete->삭제
 #ListAPIView:모델 객체 목록 조회 및 새로운 객체 생성(get, post) -> 목록에 대한
 #DetailAPIView:객체 내용, 수정, 삭제(get, put, delete) -> 특정 객체에 대한 
@@ -60,6 +60,9 @@ class ProductFilter(django_filters.FilterSet):
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
+    permission_classes = [
+        AllowAny,
+    ]
 
     #url : api/products/{pk}/category -> pk는 category_id
     @action(methods=['get'], detail=True)
@@ -94,7 +97,7 @@ class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
 
     permission_classes = [
-        permissions.IsAuthenticated,
+        IsAuthenticated,
     ]
 
 
