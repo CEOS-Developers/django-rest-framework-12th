@@ -367,3 +367,17 @@ class RoutineFilter(FilterSet):
 - ```http://127.0.0.1:8000/api/routine?createdAt=''``` -> 파라미터 값과 상관없는 필터의 경우 어떻게?
 
 ### 2. permission
+- django user가 일치할 때만 데이터를 수정할 수 있게 permission을 부여했습니다.
+```
+class OnlyOwnerPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        logger.info(request)
+        logger.info(obj)
+        return request.user == obj.profile.user
+
+
+# Viewset
+class RoutineViewSet(viewsets.ModelViewSet):
+    permission_classes = [OnlyOwnerPermission]
+...
+```
