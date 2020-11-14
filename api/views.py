@@ -32,6 +32,7 @@ from django_filters.rest_framework import FilterSet, filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 class ProductFilter(django_filters.FilterSet):
+    # ex) urls: api/products?category=1&price_lte=10000 -> category, price 인자 전달
     category = django_filters.NumberFilter()
     price = django_filters.NumberFilter()
     color = django_filters.CharFilter(method='my_custom_color')
@@ -47,14 +48,12 @@ class ProductFilter(django_filters.FilterSet):
             'price' : ['lte'], #generate 'price__lte' filters
             'color' : ['iexact'] #generate 'color__iexact' filters
         }
-
-    def my_custom_color(self, queryset, name, value):
-        """
+    
+    #ex) urls: api/products?color=black
+    def my_custom_color(self, queryset, name, value): #value = param의 값 ex)api/products/?color=orange -> value = orange
         #construct the full lookup expression
-        lookup = '__'.join([name, 'iexact'])
-        return queryset.filter(**{lookup: 'orange'})
-        """
-        return queryset.filter(**{name: 'black'}) #다른 색깔 입력해도 왜 black 객체만 나오지..?
+        lookup = '__'.join([name, 'iexact']) #lookup = color__iexact
+        return queryset.filter(**{lookup: value}) #color__iexact의 값이 value인 객체만 필터링
 
 #product
 class ProductViewSet(viewsets.ModelViewSet):
@@ -80,7 +79,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-
+    permission_classes = [
+        AllowAny,
+    ]
 
     #다시보기...
     #url : api/categories/{pk}/product/ -> 해당 카테고리 이름과 해당 카테고리의 상품들 나오게
