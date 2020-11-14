@@ -4,8 +4,8 @@
 # from rest_framework.views import APIView
 # from rest_framework import status
 # from django.shortcuts import get_object_or_404
-
-
+#
+#
 # class PostListAPIView(APIView):
 #     def get(self, request):
 #         serializer = PostSerializer(Post.objects.all(), many=True)
@@ -91,42 +91,40 @@
 #         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 
+################# filtering 미션
 from django_filters.rest_framework import FilterSet, filters, DateFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import  mixins, viewsets, permissions
+from rest_framework.viewsets import ModelViewSet
+from rest_framework import mixins, viewsets
 
-from . import serializers
+from .permissions import IsAuthorOrReadonly
 from .models import Post
 from .serializers import PostSerializer
-import datetime
 
 
 class PostFilter(FilterSet):
-    content = filters.CharFilter(lookup_expr='icontains')
-    posted_date = DateFromToRangeFilter()
-    likes = filters.NumberFilter(lookup_expr='gte')
+    content = filters.CharFilter(lookup_expr='icontains') # GET으로 넘어온 string이 content에 포함되는가
+    posted_date = DateFromToRangeFilter() # GET으로 넘어온 start 날짜 ~ end 날짜에 posted_date가 포함되는가
+    likes = filters.NumberFilter(lookup_expr='gte') # GET으로 넘어온 숫자보다 likes 수가 많은가
     dislikes = filters.BooleanFilter(method='malicious_posts')
 
     class Meta:
         model = Post
         fields = ['content', 'posted_date', 'likes', 'dislikes']
 
-    def malicious_posts(self, queryset, name, value):
+    def malicious_posts(self, queryset, name, value): # dislikes의 수가 15개인데 likes가 3개 이하인 queryset
         filtered_queryset = queryset.filter(dislikes__gte=15).filter(likes__lte=3).order_by('-posted_date')
         return filtered_queryset
 
 
-class PostViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PostFilter
 
+    permission_classes = [
+             IsAuthorOrReadonly,
+    ]
 
-class PostCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    pemission_classes = (permissions.IsAuthenticated,)
-
-
-class PostUpdateViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
-    pemission_classes = (permissions.IsAuthenticated,)
