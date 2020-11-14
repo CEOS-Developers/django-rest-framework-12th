@@ -5,28 +5,73 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Routine
-from .Serializers import RoutineSerializer
+from .models import Routine, Workout
+from .Serializers import RoutineSerializer, WorkoutSerializer
 from rest_framework import viewsets
+from rest_framework import permissions
 from rest_framework.decorators import action
 from datetime import datetime
+from django_filters.rest_framework import FilterSet, filters
+from django_filters.rest_framework import DjangoFilterBackend
+import logging
+
+
+logger = logging.getLogger("mylogger")
+
+# FilterSet
+class RoutineFilter(FilterSet):
+    class Meta:
+        model = Routine
+        fields = ['name']
+
+    name = filters.CharFilter()
+    id = filters.NumberFilter(method='filter_is_id_greater_than')
+    createdAt = filters.CharFilter(method='filter_is_created_today')
+
+    def filter_is_id_greater_than(self, queryset, name, value):
+        filtered_queryset = queryset.filter(id__gt=value)
+        return filtered_queryset
+
+    def filter_is_created_today(self, queryset, name, value):
+        filtered_queryset = queryset.filter(createdAt__year=datetime.today().year,
+                                            createdAt__month=datetime.today().month,
+                                            createdAt__day=datetime.today().day)
+        return filtered_queryset
+
+
+class OnlyOwnerPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        logger.info(request)
+        logger.info(obj)
+        return request.user == obj.profile.user
 
 
 # Viewset
-class RoutineViewSet(viewsets.ModelViewSet) :
-    serializer_class = RoutineSerializer
+class RoutineViewSet(viewsets.ModelViewSet):
+    permission_classes = [OnlyOwnerPermission]
+
     queryset = Routine.objects.all()
+    serializer_class = RoutineSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RoutineFilter
+    # filterset_fields = ['name']
 
     # add action
-    @action(methods=['get'], detail=False, url_name='', url_path='')
-    def list_created_today(self, request, *args, **kwargs):
-        routines = Routine.objects.filter(
-            createdAt__year=datetime.today().year,
-            createdAt__month = datetime.today().month,
-            createdAt__day = datetime.today().day
-        )
-        serializer = RoutineSerializer(routines, many=True)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+    # @action(methods=['get'], detail=False, url_name='', url_path='')
+    # def list_created_today(self, request, *args, **kwargs):
+    #     routines = Routine.objects.filter(
+    #         createdAt__year=datetime.today().year,
+    #         createdAt__month = datetime.today().month,
+    #         createdAt__day = datetime.today().day
+    #     )
+    #     serializer = RoutineSerializer(routines, many=True)
+    #     return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+
+class WorkoutViewSet(viewsets.ModelViewSet) :
+    serializer_class = WorkoutSerializer
+    queryset = Workout.objects.all()
+
 
 # # CBV
 # class RoutineList(APIView):

@@ -311,3 +311,59 @@ RESULT :
  - 간단한 회고
     1. 몇 주만에 파이썬 & 장고를 보니 싸웠던 친구를 만난 것처럼 어색했다...
     2. 하지만 역시 하다보니 파이썬 갓갓 장고 갓갓.
+    
+    
+ ## 5주차 과제
+ ### 1. Filtering
+ #### 단순 문자열 일치 필터링
+ - ```
+   # viewset
+    class RoutineViewSet(viewsets.ModelViewSet):
+    queryset = Routine.objects.all()
+    serializer_class = RoutineSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RoutineFilter
+   
+   # Filter
+   class RoutineFilter(FilterSet):
+    class Meta:
+        model = Routine
+        fields = ['name']
+
+    name = filters.CharFilter() 
+    ```
+ - ```field_name```과 ```lookup_expr```의 default는 각각 필드명과 exact이므로 단순 문자열 일치의 경우 명시할 필요 없음!
+ - 이 경우 사실 class를 만들 필요까진 없고 ViewSet에서 filter_fileds만 명시해주어도 된다.
+- ```
+    class RoutineViewSet(viewsets.ModelViewSet):
+    queryset = Routine.objects.all()
+    serializer_class = RoutineSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ('name')
+    ```
+ #### 조건을 파라미터로 전달하기 어려운 경우
+ - 단순 문자열 일치가 아닌 filter expression을 사용해야할 때는 filterset class를 만들어 사용한다.
+ ```
+class RoutineFilter(FilterSet):
+    class Meta:
+        model = Routine
+        fields = ['name']
+
+    name = filters.CharFilter()
+    id = filters.NumberFilter(method='filter_is_id_greater_than')
+    createdAt = filters.CharFilter(method='filter_is_created_today')
+
+    def filter_is_id_greater_than(self, queryset, name, value):
+        filtered_queryset = queryset.filter(id__gt=value)
+        return filtered_queryset
+
+    def filter_is_created_today(self, queryset, name, value):
+        filtered_queryset = queryset.filter(createdAt__year=datetime.today().year,
+                                            createdAt__month=datetime.today().month,
+                                            createdAt__day=datetime.today().day)
+        return filtered_queryset
+```
+- ```http://127.0.0.1:8000/api/routine?id=5``` -> 직관적이지 못한 느낌?
+- ```http://127.0.0.1:8000/api/routine?createdAt=''``` -> 파라미터 값과 상관없는 필터의 경우 어떻게?
+
+### 2. permission

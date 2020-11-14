@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group  # 기존 장고 모델
 from rest_framework import serializers
-from api.models import Routine, Profile
+from api.models import Routine, Profile, Workout
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,4 +22,10 @@ class RoutineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Routine
+        fields = '__all__'
+
+
+class WorkoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Workout
         fields = '__all__'
