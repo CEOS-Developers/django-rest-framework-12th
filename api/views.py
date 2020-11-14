@@ -1,13 +1,14 @@
 from django.shortcuts import render
-from .serializers import *
+from .serializers import CustomerSerializer, UserSerializer, ProductSerializer, ChoiceSerializer, CategorySerializer, CartSerializer
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import authentication, permissions, status
 from django.contrib.auth.models import User
-from .models import *
+from .models import Customer, Product, Choice, Category, Cart
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
+from rest_framework import permissions
 #post -> 생성, get -> 조회, put -> 수정, delete->삭제
 #ListAPIView:모델 객체 목록 조회 및 새로운 객체 생성(get, post) -> 목록에 대한
 #DetailAPIView:객체 내용, 수정, 삭제(get, put, delete) -> 특정 객체에 대한 
@@ -70,6 +71,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter
 
+
+
 #Category
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -89,6 +92,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     queryset = Cart.objects.all()
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
 
 #choice
 class ChoiceViewSet(viewsets.ModelViewSet):
