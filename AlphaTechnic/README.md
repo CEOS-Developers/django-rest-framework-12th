@@ -1074,3 +1074,23 @@ class PostViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     
 
+### 의문사항
+
+```python
+class PostFilter(FilterSet):
+    content = filters.CharFilter(lookup_expr='icontains') # GET으로 넘어온 string이 content에 포함되는가
+    posted_date = DateFromToRangeFilter() # GET으로 넘어온 start 날짜 ~ end 날짜에 posted_date가 포함되는가
+    likes = filters.NumberFilter(lookup_expr='gte') # GET으로 넘어온 숫자보다 likes 수가 많은가
+    dislikes = filters.BooleanFilter(method='malicious_posts')
+
+    class Meta:
+        model = Post
+        fields = ['content', 'posted_date', 'likes', 'dislikes']
+
+    def malicious_posts(self, queryset, name, value): # dislikes의 수가 15개인데 likes가 3개 이하인 queryset
+        filtered_queryset = queryset.filter(dislikes__gte=15).filter(likes__lte=3).order_by('-posted_date')
+        return filtered_queryset
+
+```
+
+모델의 필드명 말고 다른 작명을 하고싶은데, 그렇게 하게되면, API 서버에서 [invalid name]이라고 뜨게됨. 다른 작명이 가능한 지.
