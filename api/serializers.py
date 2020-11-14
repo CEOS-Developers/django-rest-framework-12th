@@ -22,6 +22,12 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'category', 'price', 'color', 'size')
 
+#customizing nested 
+class ProductListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return 'id : {} price : {}'.format(value.id, value.price)
+
+
 class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -37,10 +43,10 @@ class ChoiceSerializer(serializers.ModelSerializer):
         fields = "__all__"#모든 필드 serialize
 
 class CategorySerializer(serializers.ModelSerializer):
-
+    products = ProductListingField(many=True, read_only=True)
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = ('id', 'name', 'products')
 
 
 
