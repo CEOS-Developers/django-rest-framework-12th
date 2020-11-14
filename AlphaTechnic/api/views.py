@@ -42,48 +42,91 @@
 #         post = self.get_object(pk)
 #         post.delete()
 #         return Response(status=status.HTTP_204_NO_CONTENT)
-from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
-from rest_framework.response import Response
+
+
+# from rest_framework import status
+# from rest_framework.viewsets import ModelViewSet
+# from rest_framework.decorators import action
+# from rest_framework.response import Response
+# from .models import Post
+# from .serializers import PostSerializer
+# import datetime
+#
+#
+# class PostViewSet(ModelViewSet):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#
+#     # url : posts/popular/
+#     @action(detail=False)
+#     def popular(self, request): # 좋아요 20개 이상 받은 인기 posts
+#         qs = self.queryset.filter(likes__gt=20).order_by('-posted_date')[:10]
+#         serializer = self.get_serializer(qs, many=True)
+#         return Response(status=status.HTTP_200_OK, data=serializer.data)
+#
+#     # url : posts/today/
+#     @action(detail=False)
+#     def today(self, request): # 오늘 생성된 posts
+#         today = datetime.date.today()
+#         qs = self.queryset.filter(posted_date__gt=today).order_by('-posted_date')
+#         serializer = self.get_serializer(qs, many=True)
+#         return Response(status=status.HTTP_200_OK, data=serializer.data)
+#
+#     # url : posts/{pk}/add_likes/
+#     @action(detail=True, methods=['get', 'patch'])
+#     def add_likes(self, request, pk):  # 좋아요 하나 추가
+#         obj = self.get_object()
+#         obj.likes += 1
+#         obj.save()
+#         serializer = self.get_serializer(obj)
+#         return Response(status=status.HTTP_200_OK, data=serializer.data)
+#
+#     # url : posts/{pk}/add_dislikes/
+#     @action(detail=True, methods=['get', 'patch'])
+#     def add_dislikes(self, request, pk):  # 싫어요 하나 추가
+#         obj = self.get_object()
+#         obj.dislikes += 1
+#         obj.save()
+#         serializer = self.get_serializer(obj)
+#         return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+
+from django_filters.rest_framework import FilterSet, filters, DateFromToRangeFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import  mixins, viewsets, permissions
+
+from . import serializers
 from .models import Post
 from .serializers import PostSerializer
 import datetime
 
 
-class PostViewSet(ModelViewSet):
+class PostFilter(FilterSet):
+    content = filters.CharFilter(lookup_expr='icontains')
+    posted_date = DateFromToRangeFilter()
+    likes = filters.NumberFilter(lookup_expr='gte')
+    dislikes = filters.BooleanFilter(method='malicious_posts')
+
+    class Meta:
+        model = Post
+        fields = ['content', 'posted_date', 'likes', 'dislikes']
+
+    def malicious_posts(self, queryset, name, value):
+        filtered_queryset = queryset.filter(dislikes__gte=15).filter(likes__lte=3).order_by('-posted_date')
+        return filtered_queryset
+
+
+class PostViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PostFilter
 
-    # url : posts/popular/
-    @action(detail=False)
-    def popular(self, request): # 좋아요 20개 이상 받은 인기 posts
-        qs = self.queryset.filter(likes__gt=20).order_by('-posted_date')[:10]
-        serializer = self.get_serializer(qs, many=True)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    # url : posts/today/
-    @action(detail=False)
-    def today(self, request): # 오늘 생성된 posts
-        today = datetime.date.today()
-        qs = self.queryset.filter(posted_date__gt=today).order_by('-posted_date')
-        serializer = self.get_serializer(qs, many=True)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+class PostCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    pemission_classes = (permissions.IsAuthenticated,)
 
-    # url : posts/{pk}/add_likes/
-    @action(detail=True, methods=['get', 'patch'])
-    def add_likes(self, request, pk):  # 좋아요 하나 추가
-        obj = self.get_object()
-        obj.likes += 1
-        obj.save()
-        serializer = self.get_serializer(obj)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    # url : posts/{pk}/add_dislikes/
-    @action(detail=True, methods=['get', 'patch'])
-    def add_dislikes(self, request, pk):  # 싫어요 하나 추가
-        obj = self.get_object()
-        obj.dislikes += 1
-        obj.save()
-        serializer = self.get_serializer(obj)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+class PostUpdateViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    pemission_classes = (permissions.IsAuthenticated,)
