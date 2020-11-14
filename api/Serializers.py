@@ -24,6 +24,9 @@ class RoutineSerializer(serializers.ModelSerializer):
         model = Routine
         fields = '__all__'
 
+    def validate_bgImage(self, value):
+        if value > 10:
+            raise serializers.ValidationError("no bg image id greater than 10")
 
 class WorkoutSerializer(serializers.ModelSerializer):
     class Meta:
