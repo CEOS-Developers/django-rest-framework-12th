@@ -507,3 +507,193 @@ class ChoiceViewSet(viewsets.ModelViewSet):
 
   **[Django문서 Routers]** https://www.django-rest-framework.org/api-guide/routers/#custom-routers
 
+
+
+# 5주차 스터디
+
+### DRF4 : Filtering과 Permission
+
+### Filtering 적용
+
+```python
+import django_filters
+from django_filters.rest_framework import FilterSet, filters
+from django_filters.rest_framework import DjangoFilterBackend
+
+class ProductFilter(django_filters.FilterSet):
+    # ex) urls: api/products?category=1&price_lte=10000 -> category, price 인자 전달
+    category = django_filters.NumberFilter()
+    price = django_filters.NumberFilter()
+    color = django_filters.CharFilter(method='my_custom_color')
+
+    class Meta:
+        model = Product
+        fields = {
+            'price' : ['lte'], #generate 'price__lte' filters
+            'color' : ['iexact'] #generate 'color__iexact' filters
+        }
+    
+    #ex) urls: api/products?color=black
+    def my_custom_color(self, queryset, name, value): #value = param의 값 ex)api/products/?color=orange -> value = orange
+        #construct the full lookup expression
+        lookup = '__'.join([name, 'iexact']) #lookup = color__iexact
+        return queryset.filter(**{lookup: value}) #color__iexact의 값이 value인 객체만 필터링
+    
+    
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+    
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+```
+
+1) 특정 카테고리에 속하는 상품 & 특정 값 이하의 상품 보여주기
+
+METHOD : GET
+
+URL : api/products/?category=3&price_lte=10000
+
+![productfilter1](./img/productfilter1.png)
+
+2)특정 색깔의 상품 보여주기(method 사용)
+
+METHOD : GET
+
+URL : api/products/?color=black
+
+![productfilter2](./img/productfilter2.png)
+
+
+
+### Permission 적용
+
+```python
+#permission.py
+
+from rest_framework import permissions
+from rest_framework.permissions import BasePermission
+
+#카트는 로그인한 유저에게만 보여지도록
+class IsAuthenticated(BasePermission):
+    message = 'Login is needed'
+    
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated)
+
+
+#상품&카테고리 등록 및 삭제는 스태프에게만 허용
+class AllowAny(BasePermission):
+    message = 'Adding, Deleting not allowed'
+
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+
+        if request.method in permissions.SAFE_METHODS: #GET, HEAD, OPTION(수정 삭제 삽입 제외)
+            return True
+        else:
+            return request.user.is_staff
+        
+#models.py
+from .permissions import IsAuthenticated, AllowAny
+
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+    permission_classes = [
+        AllowAny,
+    ]
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+    permission_classes = [
+        AllowAny,
+    ]
+    
+class CartViewSet(viewsets.ModelViewSet):
+    serializer_class = CartSerializer
+    queryset = Cart.objects.all()
+
+    permission_classes = [
+        IsAuthenticated,
+    ]
+
+```
+
+1) Cart Model 객체는 로그인한 해당 유저의 것만 보여주기
+
+![cart_permission](./img/cart_permission.png)
+
+
+
+2)상품&카테고리의 객체 수정, 삭제, 삽입은 스태프에게만 허용
+
+![AllowAny_permission](./img/AllowAny_permission.jpg)
+
+![allowany_permission3](./img/allowany_permission3.png)
+
+### 공부 내용 정리
+
+- Filtering
+
+  -어떤 queryset에 대해 원하는 옵션대로 필터를 걸어, 해당 조건을 만족하는 특정 쿼리셋을 만들어내는 작업
+
+  -여러 개의 대상에 대해 그 중 일부만 걸러주기 위해 사용되므로, list view에서만 사용됨 
+
+  [참고]
+
+  [django-filter] https://django-filter.readthedocs.io/en/stable/guide/usage.html
+  
+  [Filter Backends] https://show-me-the-money.tistory.com/42
+
+  [FilterSet Options] https://django-filter.readthedocs.io/en/stable/ref/filterset.html
+
+  
+  
+- Permission
+
+  -request.user & request.auth의 인증 정보 사용
+
+  -장고는 모델에 add, change, delete permission을 자동적으로 제공
+
+  -view의 main body 실행 전, permission 체크 먼저 수행
+
+  ​    --> 실패 시, '403 Forbidden' or '401 Unauthorized' response 반환
+
+  2가지 대표 스타일
+
+  ​	1.IsAuthenticated
+
+  ​	   allow access to any authenticated user
+
+  ​       deny access to any unauthenticated user
+
+  ​    2.IsAuthenticatedOrReadOnly
+
+  ​       allow full access to authenticated user
+
+  ​       allow read-only access to unauthenticated user
+
+  [참고]
+
+  [permission 관련 함수들] https://github.com/encode/django-rest-framework/blob/master/rest_framework/permissions.py
+
+  [permission 예제] https://ssungkang.tistory.com/entry/Django-Authentication-%EA%B3%BC-Permissions
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
