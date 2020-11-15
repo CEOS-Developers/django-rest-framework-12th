@@ -534,7 +534,7 @@ class ProductFilter(django_filters.FilterSet):
         }
     
     #ex) urls: api/products?color=black
-    def my_custom_color(self, queryset, name, value): #value = param의 값 ex)api/products/?color=orange -> value = orange
+    def my_custom_color(self, queryset, name, value): #value = query param의 값 ex)api/products/?color=orange -> value = orange
         #construct the full lookup expression
         lookup = '__'.join([name, 'iexact']) #lookup = color__iexact
         return queryset.filter(**{lookup: value}) #color__iexact의 값이 value인 객체만 필터링
@@ -662,30 +662,99 @@ class CartViewSet(viewsets.ModelViewSet):
   -view의 main body 실행 전, permission 체크 먼저 수행
 
   ​    --> 실패 시, '403 Forbidden' or '401 Unauthorized' response 반환
-
+  
   2가지 대표 스타일
 
   ​	1.IsAuthenticated
 
   ​	   allow access to any authenticated user
-
+  
   ​       deny access to any unauthenticated user
-
+  
   ​    2.IsAuthenticatedOrReadOnly
-
+  
   ​       allow full access to authenticated user
-
+  
   ​       allow read-only access to unauthenticated user
-
+  
   [참고]
-
+  
   [permission 관련 함수들] https://github.com/encode/django-rest-framework/blob/master/rest_framework/permissions.py
-
+  
   [permission 예제] https://ssungkang.tistory.com/entry/Django-Authentication-%EA%B3%BC-Permissions
+  
+  
+  
+- Validation
+
+  *Raising an exception on invalid data
+
+  ```python
+  #Return a 400 response if the data was invalid.
+  serializer.is_valid(raise_exception=True)
+  ```
+
+  -raise_exception의 기능: raise a serializer.ValidationError exception
+
+  -위의 exception은 REST framework가 제공하는 default exception handler이고, default로 HTTP 400 Bad Request 반환
 
   
 
+  *Field-level validation
+
+  방법) adding .validate_<field_name> methods to Serializer subclass
+
+  ​	->해당 메서드는 validated value를 반환하거나, serializers.ValidationError 발생시켜야 함
+
+  ​	ex) def validate_title(self, value)
+
   
+
+  *Object-level validation
+
+  2개 이상의 필드에 대한 접근이 필요할 때 사용
+
+  방법) adding .validate() method to Serializer subclass
+
+  ​	->해당 메서드는 validated value를 반환하거나, serializers.ValidationError 발생시켜야 함
+
+  ​	ex) def validate(self, data)
+
+  ​		->data = dicationary of field values
+
+  
+
+  *Validators
+
+  serializer의 각각의 필드에 대해 validator 포함 가능 -> 필드 객체에 선언
+
+  ```python
+  def multiple_of_ten(value):
+      if value % 10 != 0:
+          raise serializers.ValidationError('Not a multiple of ten')
+  
+  class GameRecord(serializers.Serializer):
+      score = IntegerField(validators=[multiple_of_ten])
+      ...
+  ```
+
+  reusable validators 사용 -> inner Meta class에 선언
+
+  ```python
+  class EventSerializer(serializers.Serializer):
+      name = serializers.CharField()
+      room_number = serializers.IntegerField(choices=[101, 102, 103, 201])
+      date = serializers.DateField()
+  
+      class Meta:
+          # Each room only has one event per day.
+          validators = [
+              UniqueTogetherValidator(
+                  queryset=Event.objects.all(),
+                  fields=['room_number', 'date']
+              )
+          ]
+  ```
 
   
 
