@@ -107,7 +107,7 @@ class PostFilter(FilterSet):
     content = filters.CharFilter(lookup_expr='icontains') # GET으로 넘어온 string이 content에 포함되는가
     posted_date = DateFromToRangeFilter() # GET으로 넘어온 start 날짜 ~ end 날짜에 posted_date가 포함되는가
     likes = filters.NumberFilter(lookup_expr='gte') # GET으로 넘어온 숫자보다 likes 수가 많은가
-    dislikes = filters.BooleanFilter(method='malicious_posts')
+    dislikes = filters.BooleanFilter(field_name='malcious', method='malicious_posts', label="malcious")
 
     class Meta:
         model = Post
