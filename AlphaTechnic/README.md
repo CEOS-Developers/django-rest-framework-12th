@@ -794,3 +794,303 @@ class Preference(models.Model):
 
 해당 post의 dislikes가 하나 증가하였다.
 
+
+
+## 5주차 - DRF4 : Filtering 과 Permission & Validator
+
+------------------
+
+### Filtering
+
+- filtering은 어떤 query set에 대하여 원하는 옵션대로 **필터를 걸**어, 해당 조건을 만족하는 특정 쿼리셋을 만들어내는 작업이다.
+
+- 이런 filter 기능은 viewset 사용 시에 `list 액션`을 오버라이딩 해서 로직을 넣어줌으로써 사용할 수 있다.
+
+- filterset
+
+    - **DRF의 viewset**에서는 이러한 기능을 보다 손쉽게 사용할 수 있도록 filterset이라는 속성을 제공한다.
+
+    - filterset은 기본적으로, 클라이언트가 접근하는 해당 API url에 추가적으로 붙는 query parameter를 필터의 옵션으로 인식하고, 이에 따라 기본 쿼리셋을 필터링 해, 이를 response로 내어준다.
+
+    - 보통 `listview`에서만 사용된다.
+
+    - 사용방법 1. FilterSet 상속하여 클래스 선언
+
+        - ItemFilter 클래스를 FilterSet을 상속해 선언해주고, 해당 list view를 포함하는 viewset의 filterset_class 속성에 ItemFilter를 지정해주면 된다.
+
+        - ```python
+            from django_filters.rest_framework import FilterSet, filters
+            from django_filters.rest_framework import DjangoFilterBackend
+            
+            class ItemFilter(FilterSet):
+                name = filters.CharFilter(field_name='name')
+                is_soldout = filters.BooleanFilter(method='filter_is_soldout')
+            
+                class Meta:
+                    model = Item
+                    fields = ['name']
+            
+                def filter_is_soldout(self, queryset, name, value):
+                    filtered_queryset = queryset.filter(....)
+            
+                    ...
+            
+                    return filtered_queryset
+            
+            class ItemViewSet(mixins.ListModelMixin,
+                                                viewsets.GenericViewSet):
+                filter_backends = [DjangoFilterBackend]
+                filterset_class = ItemFilter
+            ```
+
+    
+
+    - 사용방법 2. filterset_fields라는 속성을 사용
+
+        - 지금과 같이 단순한 형태로 기존 모델의 field 값과의 일치여부 정도만 파악하는 filter라면 filterset_fields라는 속성을 사용할 수 있다.
+
+        - ```python
+            from django_filters.rest_framework import DjangoFilterBackend
+            
+            class ItemViewSet(mixins.ListModelMixin,
+            									viewsets.GenericViewSet):
+            	filter_backends = [DjangoFilterBackend]
+            	filterset_fields = ['name',]
+            ```
+
+            ​	
+
+### Permission
+
+- 어떤 api에 접근해 특정 작업을 수행하려 할 때, request에 담겨 오는 **user의 정보에 따라** 해당 api에 접근해 수행할 수 있는 작업의 권한을 줄지 말지를 결정해준다.
+
+- 기존의 action을(이를테면, update action) 오버라이딩 해 로직을 추가해서 구현한다.
+
+    - ```python
+        class UserUpdateViewSet(mixins.UpdateModelMixins,
+        												viewsets.GenericViewSet):
+        			...
+        	def update(self, request, *args, **kwargs):
+        		if request.user.pk != self.get_object.pk:
+        			return Response(status=status.HTTP_403_FORBIDDEN)
+        			...
+        ```
+
+- permission_classes
+
+    - **DRF viewset**에서는 이러한 기능을 보다 간단하게 수행할 수 있게 permission_classes라는 속성이 존재한다.
+
+    - permission 확인을 통한 authentication 기능을 수행하기 위해서는,
+
+        - 새로운 authentication logic을 사용하기 위해 기존의 DRF에서 제공하는 permission 클래스를 상속한다.
+
+        - 선언한 permission 클래스 또는 기존의 permission 클래스를 permission_classes에 list나 tuple의 형태로 permission class를 지정해준다.
+
+        - 선언한 것을 사용
+
+            ```python
+            from rest_framework import permissions
+            
+            class ItemUpdatePermission(permissions.BasePermission):
+            	
+            	def has_permission(self, request, view):
+            		 # logic for authentication
+            
+            
+            class ItemUpdateViewSet(mixins.UpdateModelMixin,
+            						viewsets.GenericViewSet):
+            	pemission_classes = (ItemUpdatePermission,)
+            ```
+
+            
+
+        - 기존의 것을 사용
+
+            ```python
+            from rest_framework import permissions
+            
+            class ItemUpdateViewSet(mixins.UpdateModelMixin,
+            					viewsets.GenericViewSet):
+            	pemission_classes = (permissions.IsAuthenticated,)
+            ```
+
+- `IsAuthenticated` 는 유저가 존재하고 로그인 되어 있을 경우에 허가한다.
+
+    ```python
+    class IsAuthenticated(BasePermission):
+        def has_permission(self, request, view):
+            return bool(request.user and request.user.is_authenticated)
+    ```
+
+- `IsAuthenticatedOrReadOnly` 는 안전한 request method 이거나 유저가 존재하고 로그인 되어 있을 경우에 허가한다.
+
+    ```python
+    class IsAuthenticatedOrReadOnly(BasePermission):
+        def has_permission(self, request, view):
+            return bool(
+                request.method in SAFE_METHODS or
+                request.user and
+                request.user.is_authenticated
+            )
+    ```
+
+    
+
+### Validation
+
+- Validator는 유혀성 검사를 하기 위해 사용한다. 대부분 REST 프레임워크에서 유효성 검사를 처리하는 경우 기본 필드 유효성 검사에 의존하거나 serializer 또는 필드 클래스에 대한 명시적인 Validator 메소드를 작성하기만 하면 된다.
+
+- `ModelSerializer`를 사용하면 이 모든 것이 자동으로 처리된다.
+
+- 유효성 검사 논리를 다른 구성요소에 배치하여, 코드 베이스 전체에서 쉽게 재사용 가능하다.
+
+- Validator 함수와 Validators 클래스를 사용하여 수행할 수 있다.
+
+- Field-level validation
+
+    ```python
+    from rest_framework import serializers
+    
+    class BlogPostSerializer(serializers.Serializer):
+        title = serializers.CharField(max_length=100)
+        content = serializers.CharField()
+    
+        def validate_title(self, value):
+            """
+            Check that the blog post is about Django.
+            """
+            if 'django' not in value.lower():
+                raise serializers.ValidationError("Blog post is not about Django")
+            return value
+    ```
+
+- Object-level validation
+
+    ```python
+    from rest_framework import serializers
+    
+    class EventSerializer(serializers.Serializer):
+        description = serializers.CharField(max_length=100)
+        start = serializers.DateTimeField()
+        finish = serializers.DateTimeField()
+    
+        def validate(self, data):
+            """
+            Check that start is before finish.
+            """
+            if data['start'] > data['finish']:
+                raise serializers.ValidationError("finish must occur after start")
+            return data
+    ```
+
+- Validators
+
+    ```python
+    def multiple_of_ten(value):
+        if value % 10 != 0:
+            raise serializers.ValidationError('Not a multiple of ten')
+    
+    class GameRecord(serializers.Serializer):
+        score = IntegerField(validators=[multiple_of_ten])
+        ...
+    ```
+
+
+
+### 과제
+
+1. filter 기능 구현하기
+
+```python
+from django_filters.rest_framework import FilterSet, filters, DateFromToRangeFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import  mixins, viewsets, permissions
+
+from .models import Post
+from .serializers import PostSerializer
+
+
+class PostFilter(FilterSet):
+    content = filters.CharFilter(lookup_expr='icontains') # GET으로 넘어온 string이 content에 포함되는가
+    posted_date = DateFromToRangeFilter() # GET으로 넘어온 start 날짜 ~ end 날짜에 posted_date가 포함되는가
+    likes = filters.NumberFilter(lookup_expr='gte') # GET으로 넘어온 숫자보다 likes 수가 많은가
+    dislikes = filters.BooleanFilter(method='malicious_posts')
+
+    class Meta:
+        model = Post
+        fields = ['content', 'posted_date', 'likes', 'dislikes']
+
+    def malicious_posts(self, queryset, name, value): # dislikes의 수가 15개인데 likes가 3개 이하인 queryset
+        filtered_queryset = queryset.filter(dislikes__gte=15).filter(likes__lte=3).order_by('-posted_date')
+        return filtered_queryset
+
+
+class PostViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PostFilter
+
+```
+
+
+
+- 실행 결과
+
+    - content로 필터링
+
+        ![image-20201115040130476](./markdown_img/image-20201115040130476.png)
+
+        
+
+    - posted_date로 필터링
+
+        ![image-20201115040927769](./markdown_img/image-20201115040927769.png)
+
+        
+
+    - likes로 필터링
+
+        ![image-20201115041203324](./markdown_img/image-20201115041203324.png)
+
+        
+
+    - custom한 dislikes로 필터링
+
+        ![image-20201115041407243](./markdown_img/image-20201115041407243.png)
+
+
+
+2. permission 설정하기
+
+- 로그인하지 않은 사용자의 접근
+
+    ![image-20201115051143030](./markdown_img/image-20201115051143030.png)
+
+- permission이 설정된 모습
+
+    ![image-20201115051603103](./markdown_img/image-20201115051603103.png)
+
+    
+
+### 의문사항
+
+```python
+class PostFilter(FilterSet):
+    content = filters.CharFilter(lookup_expr='icontains') # GET으로 넘어온 string이 content에 포함되는가
+    posted_date = DateFromToRangeFilter() # GET으로 넘어온 start 날짜 ~ end 날짜에 posted_date가 포함되는가
+    likes = filters.NumberFilter(lookup_expr='gte') # GET으로 넘어온 숫자보다 likes 수가 많은가
+    dislikes = filters.BooleanFilter(method='malicious_posts')
+
+    class Meta:
+        model = Post
+        fields = ['content', 'posted_date', 'likes', 'dislikes']
+
+    def malicious_posts(self, queryset, name, value): # dislikes의 수가 15개인데 likes가 3개 이하인 queryset
+        filtered_queryset = queryset.filter(dislikes__gte=15).filter(likes__lte=3).order_by('-posted_date')
+        return filtered_queryset
+
+```
+
+모델의 필드명 말고 다른 작명을 하고싶은데, 그렇게 하게되면, API 서버에서 [invalid name]이라고 뜨게됨. 다른 작명이 가능한 지.
