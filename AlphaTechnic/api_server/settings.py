@@ -42,7 +42,9 @@ SECRET_KEY = get_secret("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'ec2-54-180-212-244.ap-northeast-2.compute.amazonaws.com',
+]
 
 # Application definition
 
@@ -99,7 +101,17 @@ WSGI_APPLICATION = 'api_server.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 # DB 세팅할 때 이 부분을 수정해주세요!
-DATABASES = secrets['DB_SETTINGS']
+#DATABASES = secrets['DB_SETTINGS']
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'postdb',
+        'USER': 'AlphaTechnic',
+        'PASSWORD': 'nea05200',
+        'HOST': 'webdjangodb.cqoxekfskefz.ap-northeast-2.rds.amazonaws.com',
+        'PORT': '3306',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

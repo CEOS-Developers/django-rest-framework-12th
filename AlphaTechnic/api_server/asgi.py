@@ -1,5 +1,5 @@
 """
-ASGI config for api_server project.
+ASGI api_server for api_server project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
