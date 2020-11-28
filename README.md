@@ -572,45 +572,34 @@ URL : api/products/?color=black
 #permission.py
 
 from rest_framework import permissions
-from rest_framework.permissions import BasePermission
-
-#카트는 로그인한 유저에게만 보여지도록
-class IsAuthenticated(BasePermission):
-    message = 'Login is needed'
-    
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated)
-
 
 #상품&카테고리 등록 및 삭제는 스태프에게만 허용
-class AllowAny(BasePermission):
-    message = 'Adding, Deleting not allowed'
-
+class IsStaffOrReadOnly(permissions.BasePermission): 
     def has_permission(self, request, view):
         return True
 
     def has_object_permission(self, request, view, obj):
-
-        if request.method in permissions.SAFE_METHODS: #GET, HEAD, OPTION(수정 삭제 삽입 제외)
+        if request.method in permissions.SAFE_METHODS: #GET, HEAD, OPTION(수정 삭제 삽입은 제외)
             return True
         else:
             return request.user.is_staff
         
-#models.py
-from .permissions import IsAuthenticated, AllowAny
+#views.py
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsStaffOrReadOnly #custom permission
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [
-        AllowAny,
+        IsStaffOrReadOnly,
     ]
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
     permission_classes = [
-        AllowAny,
+        IsStaffOrReadOnly,
     ]
     
 class CartViewSet(viewsets.ModelViewSet):
@@ -618,7 +607,7 @@ class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
 
     permission_classes = [
-        IsAuthenticated,
+        IsAuthenticated, #로그인한 유저에게만 보여지도록
     ]
 
 ```
@@ -683,8 +672,10 @@ class CartViewSet(viewsets.ModelViewSet):
   
   [permission 예제] https://ssungkang.tistory.com/entry/Django-Authentication-%EA%B3%BC-Permissions
   
-  
-  
+  [permission 공식 문서] https://www.django-rest-framework.org/api-guide/permissions/#allowany
+
+
+
 - Validation
 
   *Raising an exception on invalid data
