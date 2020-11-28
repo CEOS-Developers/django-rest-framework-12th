@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from .models import Customer, Product, Choice, Category, Cart
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from .permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsStaffOrReadonly
 #post -> 생성, get -> 조회, put -> 수정, delete->삭제
 #ListAPIView:모델 객체 목록 조회 및 새로운 객체 생성(get, post) -> 목록에 대한
 #DetailAPIView:객체 내용, 수정, 삭제(get, put, delete) -> 특정 객체에 대한 
@@ -50,7 +51,7 @@ class ProductFilter(django_filters.FilterSet):
         }
     
     #ex) urls: api/products?color=black
-    def my_custom_color(self, queryset, name, value): #value = param의 값 ex)api/products/?color=orange -> value = orange
+    def my_custom_color(self, queryset, name, value): #value = query param의 값 ex)api/products/?color=orange -> value = orange
         #construct the full lookup expression
         lookup = '__'.join([name, 'iexact']) #lookup = color__iexact
         return queryset.filter(**{lookup: value}) #color__iexact의 값이 value인 객체만 필터링
@@ -60,7 +61,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [
-        AllowAny,
+        IsStaffOrReadonly,
     ]
 
     #url : api/products/{pk}/category -> pk는 category_id
@@ -80,7 +81,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
     permission_classes = [
-        AllowAny,
+        IsStaffOrReadonly,
     ]
 
     #다시보기...
