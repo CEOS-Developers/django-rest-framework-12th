@@ -51,6 +51,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_filters',
     'rest_framework',
     'api.apps.ApiConfig',#생성 api app 추가
     'django.contrib.admin',
@@ -67,6 +68,13 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES':(
         'rest_framework.renderers.JSONRenderer',
     )
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
 }
 """
 

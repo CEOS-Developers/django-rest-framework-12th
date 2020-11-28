@@ -507,3 +507,253 @@ class ChoiceViewSet(viewsets.ModelViewSet):
 
   **[Django문서 Routers]** https://www.django-rest-framework.org/api-guide/routers/#custom-routers
 
+
+
+# 5주차 스터디
+
+### DRF4 : Filtering과 Permission
+
+### Filtering 적용
+
+```python
+import django_filters
+from django_filters.rest_framework import FilterSet, filters
+from django_filters.rest_framework import DjangoFilterBackend
+
+class ProductFilter(django_filters.FilterSet):
+    # ex) urls: api/products?category=1&price_lte=10000 -> category, price 인자 전달
+    category = django_filters.NumberFilter()
+    price = django_filters.NumberFilter()
+    color = django_filters.CharFilter(method='my_custom_color')
+
+    class Meta:
+        model = Product
+        fields = {
+            'price' : ['lte'], #generate 'price__lte' filters
+            'color' : ['iexact'] #generate 'color__iexact' filters
+        }
+    
+    #ex) urls: api/products?color=black
+    def my_custom_color(self, queryset, name, value): #value = query param의 값 ex)api/products/?color=orange -> value = orange
+        #construct the full lookup expression
+        lookup = '__'.join([name, 'iexact']) #lookup = color__iexact
+        return queryset.filter(**{lookup: value}) #color__iexact의 값이 value인 객체만 필터링
+    
+    
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+    
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+```
+
+1) 특정 카테고리에 속하는 상품 & 특정 값 이하의 상품 보여주기
+
+METHOD : GET
+
+URL : api/products/?category=3&price_lte=10000
+
+![productfilter1](./img/productfilter1.png)
+
+2)특정 색깔의 상품 보여주기(method 사용)
+
+METHOD : GET
+
+URL : api/products/?color=black
+
+![productfilter2](./img/productfilter2.png)
+
+
+
+### Permission 적용
+
+```python
+#permission.py
+
+from rest_framework import permissions
+
+#상품&카테고리 등록 및 삭제는 스태프에게만 허용
+class IsStaffOrReadOnly(permissions.BasePermission): 
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS: #GET, HEAD, OPTION(수정 삭제 삽입은 제외)
+            return True
+        else:
+            return request.user.is_staff
+        
+#views.py
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsStaffOrReadOnly #custom permission
+
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+    permission_classes = [
+        IsStaffOrReadOnly,
+    ]
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+    permission_classes = [
+        IsStaffOrReadOnly,
+    ]
+    
+class CartViewSet(viewsets.ModelViewSet):
+    serializer_class = CartSerializer
+    queryset = Cart.objects.all()
+
+    permission_classes = [
+        IsAuthenticated, #로그인한 유저에게만 보여지도록
+    ]
+
+```
+
+1) Cart Model 객체는 로그인한 해당 유저의 것만 보여주기
+
+![cart_permission](./img/cart_permission.png)
+
+
+
+2)상품&카테고리의 객체 수정, 삭제, 삽입은 스태프에게만 허용
+
+![AllowAny_permission](./img/AllowAny_permission.jpg)
+
+![allowany_permission3](./img/allowany_permission3.png)
+
+### 공부 내용 정리
+
+- Filtering
+
+  -어떤 queryset에 대해 원하는 옵션대로 필터를 걸어, 해당 조건을 만족하는 특정 쿼리셋을 만들어내는 작업
+
+  -여러 개의 대상에 대해 그 중 일부만 걸러주기 위해 사용되므로, list view에서만 사용됨 
+
+  [참고]
+
+  [django-filter] https://django-filter.readthedocs.io/en/stable/guide/usage.html
+  
+  [Filter Backends] https://show-me-the-money.tistory.com/42
+
+  [FilterSet Options] https://django-filter.readthedocs.io/en/stable/ref/filterset.html
+
+  
+  
+- Permission
+
+  -request.user & request.auth의 인증 정보 사용
+
+  -장고는 모델에 add, change, delete permission을 자동적으로 제공
+
+  -view의 main body 실행 전, permission 체크 먼저 수행
+
+  ​    --> 실패 시, '403 Forbidden' or '401 Unauthorized' response 반환
+  
+  2가지 대표 스타일
+
+  ​	1.IsAuthenticated
+
+  ​	   allow access to any authenticated user
+  
+  ​       deny access to any unauthenticated user
+  
+  ​    2.IsAuthenticatedOrReadOnly
+  
+  ​       allow full access to authenticated user
+  
+  ​       allow read-only access to unauthenticated user
+  
+  [참고]
+  
+  [permission 관련 함수들] https://github.com/encode/django-rest-framework/blob/master/rest_framework/permissions.py
+  
+  [permission 예제] https://ssungkang.tistory.com/entry/Django-Authentication-%EA%B3%BC-Permissions
+  
+  [permission 공식 문서] https://www.django-rest-framework.org/api-guide/permissions/#allowany
+
+
+
+- Validation
+
+  *Raising an exception on invalid data
+
+  ```python
+  #Return a 400 response if the data was invalid.
+  serializer.is_valid(raise_exception=True)
+  ```
+
+  -raise_exception의 기능: raise a serializer.ValidationError exception
+
+  -위의 exception은 REST framework가 제공하는 default exception handler이고, default로 HTTP 400 Bad Request 반환
+
+  
+
+  *Field-level validation
+
+  방법) adding .validate_<field_name> methods to Serializer subclass
+
+  ​	->해당 메서드는 validated value를 반환하거나, serializers.ValidationError 발생시켜야 함
+
+  ​	ex) def validate_title(self, value)
+
+  
+
+  *Object-level validation
+
+  2개 이상의 필드에 대한 접근이 필요할 때 사용
+
+  방법) adding .validate() method to Serializer subclass
+
+  ​	->해당 메서드는 validated value를 반환하거나, serializers.ValidationError 발생시켜야 함
+
+  ​	ex) def validate(self, data)
+
+  ​		->data = dicationary of field values
+
+  
+
+  *Validators
+
+  serializer의 각각의 필드에 대해 validator 포함 가능 -> 필드 객체에 선언
+
+  ```python
+  def multiple_of_ten(value):
+      if value % 10 != 0:
+          raise serializers.ValidationError('Not a multiple of ten')
+  
+  class GameRecord(serializers.Serializer):
+      score = IntegerField(validators=[multiple_of_ten])
+      ...
+  ```
+
+  reusable validators 사용 -> inner Meta class에 선언
+
+  ```python
+  class EventSerializer(serializers.Serializer):
+      name = serializers.CharField()
+      room_number = serializers.IntegerField(choices=[101, 102, 103, 201])
+      date = serializers.DateField()
+  
+      class Meta:
+          # Each room only has one event per day.
+          validators = [
+              UniqueTogetherValidator(
+                  queryset=Event.objects.all(),
+                  fields=['room_number', 'date']
+              )
+          ]
+  ```
+
+  
+
+  
+
+  
+
+  
+
+
+

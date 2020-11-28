@@ -18,7 +18,7 @@ class Customer(models.Model) :
 
 #서비스 관련 모델 추가)
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     class Meta:
         db_table = 'categories'
@@ -45,7 +45,7 @@ class Product(models.Model):
         ordering = ['id']#오름차순 정렬
 
     def __str__(self):
-        return 'id:{} {}'.format(self.id, self.category)
+        return 'product_id:{} category_id:{}'.format(self.id, self.category)
 
 
 
