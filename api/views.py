@@ -18,25 +18,25 @@ import logging
 
 logger = logging.getLogger("mylogger")
 
+
 # FilterSet
 class RoutineFilter(FilterSet):
     class Meta:
         model = Routine
         fields = ['name']
 
-    name = filters.CharFilter()
-    id = filters.NumberFilter(method='filter_is_id_greater_than')
+    name = filters.CharFilter() # 문자열 일치
+    # filter 메서드 filter 선언으로 대
+    # id = filters.NumberFilter(method='filter_is_id_greater_than')
+    id_greater_than = filters.NumberFilter(field_name='id', lookup_expr='gt')
     createdAt = filters.CharFilter(method='filter_is_created_today')
 
-    def filter_is_id_greater_than(self, queryset, name, value):
-        filtered_queryset = queryset.filter(id__gt=value)
-        return filtered_queryset
-
-    def filter_is_created_today(self, queryset, name, value):
-        filtered_queryset = queryset.filter(createdAt__year=datetime.today().year,
-                                            createdAt__month=datetime.today().month,
-                                            createdAt__day=datetime.today().day)
-        return filtered_queryset
+    # action으로 대
+    # def filter_is_created_today(self, queryset, name, value):
+    #     filtered_queryset = queryset.filter(createdAt__year=datetime.today().year,
+    #                                         createdAt__month=datetime.today().month,
+    #                                         createdAt__day=datetime.today().day)
+    #     return filtered_queryset
 
 
 class OnlyOwnerPermission(permissions.BasePermission):
@@ -53,19 +53,19 @@ class RoutineViewSet(viewsets.ModelViewSet):
     queryset = Routine.objects.all()
     serializer_class = RoutineSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_class = RoutineFilter
-    # filterset_fields = ['name']
 
-    # add action
-    # @action(methods=['get'], detail=False, url_name='', url_path='')
-    # def list_created_today(self, request, *args, **kwargs):
-    #     routines = Routine.objects.filter(
-    #         createdAt__year=datetime.today().year,
-    #         createdAt__month = datetime.today().month,
-    #         createdAt__day = datetime.today().day
-    #     )
-    #     serializer = RoutineSerializer(routines, many=True)
-    #     return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    # filterset_fields = ['name']체
+
+    @action(methods=['get'], detail=False, url_name='', url_path='')
+    def list_created_today(self, request, *args, **kwargs):
+        routines = Routine.objects.filter(
+            createdAt__year=datetime.today().year,
+            createdAt__month = datetime.today().month,
+            createdAt__day = datetime.today().day
+        )
+        serializer = RoutineSerializer(routines, many=True)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 
 class WorkoutViewSet(viewsets.ModelViewSet) :
