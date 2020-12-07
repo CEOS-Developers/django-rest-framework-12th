@@ -16,14 +16,13 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-
 class Routine(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='routines')
     uuid = models.CharField(max_length=128)
     name = models.CharField(max_length=128, null=True, blank=True)
-    bgImage = models.IntegerField(default=0)
-    doneAt = models.DateTimeField(null=True, blank=True)
-    createdAt = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    bg_image = models.IntegerField(default=0)
+    done_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     def __str__(self):
         return self.name
